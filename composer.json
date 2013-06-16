@@ -1,5 +1,5 @@
 {
-    "name": "barnabywalters/php-mf-cleaner",
+    "name": "barnabywalters/mf-cleaner",
     "description": "Cleans up microformats2 array structures",
     "require": {
         "barnabywalters/helpers": "*"
