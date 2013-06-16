@@ -1,0 +1,18 @@
+{
+    "name": "barnabywalters/php-mf-cleaner",
+    "description": "Cleans up microformats2 array structures",
+    "require": {
+        
+    },
+    "require-dev": {
+        "phpunit/phpunit": "*"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Barnaby Walters",
+            "email": "barnaby@waterpigs.co.uk"
+        }
+    ],
+    "minimum-stability": "dev"
+}
