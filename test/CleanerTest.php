@@ -10,6 +10,25 @@ use PHPUnit_Framework_TestCase;
  * @author barnabywalters
  */
 class CleanerTest extends PHPUnit_Framework_TestCase {
+	protected function mf($name, array $properties) {
+		if (is_array($name))
+			$type = $name;
+		else
+			$type = [$name];
+		
+		foreach ($properties as $name => $arg) {
+			if (is_array($arg))
+				$properties[$name] = $arg;
+			else
+				$properties[$name] = [$arg];
+		}
+		
+		return [
+			'type' => $type,
+			'properties' => $properties
+		];
+	}
+	
 	public function testIsMicroformatReturnsFalseIfNotArray() {
 		$this->assertFalse(isMicroformat(''));
 	}
@@ -38,23 +57,9 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 		$this->assertFalse(hasNumericKeys($noNumericKeys));
 	}
 	
-	public function mf($name, array $properties) {
-		if (is_array($name))
-			$type = $name;
-		else
-			$type = [$name];
-		
-		foreach ($properties as $name => $arg) {
-			if (is_array($arg))
-				$properties[$name] = $arg;
-			else
-				$properties[$name] = [$arg];
-		}
-		
-		return [
-			'type' => $type,
-			'properties' => $properties
-		];
+	public function testIsMicroformatCollectionChecksForItemsKey() {
+		$this->assertTrue(isMicroformatCollection(['items' => []]));
+		$this->assertFalse(isMicroformatCollection(['notItems' => []]));
 	}
 	
 	public function testGetSummaryPassesIfSummaryPresent() {
@@ -129,6 +134,17 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 		];
 		
 		$result = flattenMicroformats($mfs);
+	}
+	
+	public function testFindMicroformatsByProperty() {
+		$mfs = [
+			'items' => [[
+				'name' => 'Me'
+			]]
+		];
+		
+		$results = findMicroformatsByProperty($mfs, 'name', 'Me');
+		$this->assertEquals(1, count($results));
 	}
 	
 	public function testExpandAuthorExpandsFromLargerHCardsInContext() {

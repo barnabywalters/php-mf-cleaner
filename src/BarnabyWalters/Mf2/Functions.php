@@ -31,6 +31,19 @@ function isMicroformat($mf) {
 	return true;
 }
 
+function isMicroformatCollection($mf) {
+	if (!is_array($mf))
+		return false;
+	
+	if (!isset($mf['items']))
+		return false;
+	
+	if (!is_array($mf['items']))
+		return false;
+	
+	return true;
+}
+
 function hasProp(array $mf, $propName) {
 	return !empty($mf['properties'][$propName]) and is_array($mf['properties'][$propName]);
 }
@@ -160,4 +173,8 @@ function findMicroformatsByType(array $mfs, $name) {
 	return array_values(array_filter($items, function ($mf) use ($name) {
 		return in_array($name, $mf['type']);
 	}));
+}
+
+function findMicroformatsByProperty(array $mfs, $propName, $propValue) {
+	
 }
