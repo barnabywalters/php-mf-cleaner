@@ -27,5 +27,8 @@ class Cleaner {
 	public function getPublished(array $mf) {
 		if (mfHasProp($mf, 'published'))
 			return mfProp($mf, 'published');
+		
+		if (mfHasProp($mf, 'updated'))
+			return mfProp($mf, 'updated');
 	}
 }
