@@ -32,17 +32,41 @@ class Cleaner {
 	 * 
 	 * Given a mf2 structure, tries to approximate the datetime it was published. 
 	 * If $ensureValid is true, will return null if the found value can’t be parsed
-	 * by DateTime
+	 * by DateTime,
 	 * 
 	 * @param array $mf individual mf2 array structure
 	 * @param bool $ensureValid whether or not to check whether or not the potential return value can be parsed as a DateTime
 	 * @return string|null
 	 */
 	public function getPublished(array $mf, $ensureValid = false) {
-		if (mfHasProp($mf, 'published'))
-			$return = mfProp($mf, 'published');
-		elseif (mfHasProp($mf, 'updated'))
-			$return = mfProp($mf, 'updated');
+		return $this->getDateTimeProperty('published', $mf, $ensureValid);
+	}
+	
+	/**
+	 * Get Updated Datetime
+	 * 
+	 * Given a mf2 structure, tries to approximate the datetime it was 
+	 * last updated. 
+	 * If $ensureValid is true, will return null if the found value can’t be parsed
+	 * by DateTime.
+	 * 
+	 * @param array $mf individual mf2 array structure
+	 * @param bool $ensureValid whether or not to check whether or not the potential return value can be parsed as a DateTime
+	 * @return string|null
+	 */
+	public function getUpdated(array $mf, $ensureValid = false) {
+		return $this->getDateTimeProperty('updated', $mf, $ensureValid);
+	}
+	
+	public function getDateTimeProperty($name, array $mf, $ensureValid = false) {
+		$compliment = 'published' === $name
+			? 'updated'
+			: 'published';
+		
+		if (mfHasProp($mf, $name))
+			$return = mfProp($mf, $name);
+		elseif (mfHasProp($mf, $compliment))
+			$return = mfProp($mf, $compliment);
 		else
 			return null;
 		
