@@ -15,7 +15,6 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 	
 	public function setUp() {
 		parent::setUp();
-		$this->c = new Cleaner();
 	}
 	
 	public function mf($name, array $properties) {
@@ -39,12 +38,12 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 	
 	public function testGetSummaryPassesIfSummaryPresent() {
 		$mf = $this->mf('h-entry', ['summary' => 'Hello Summary']);
-		$result = $this->c->getSummary($mf);
+		$result = getSummary($mf);
 		$this->assertEquals($mf['properties']['summary'][0], $result);
 	}
 	
 	public function testGetSummaryUsesStrippedFirstCharactersOfContent() {
-		$result = $this->c->getSummary([
+		$result = getSummary([
 			'type' => ['h-entry'],
 			'properties' => [
 				'content' => ['<p>Hello hello hello there indeed</p>']
@@ -56,25 +55,31 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 	
 	public function testGetPublishedPassesIfPublishedPresent() {
 		$mf = $this->mf('h-entry', ['published' => '2013-12-06']);
-		$result = $this->c->getPublished($mf);
-		$this->assertEquals(mfProp($mf, 'published'), $result);
+		$result = getPublished($mf);
+		$this->assertEquals(getProp($mf, 'published'), $result);
 	}
 	
 	public function testGetPublishedFallsBackToUpdated() {
 		$mf = $this->mf('h-entry', ['updated' => '2013-12-06']);
-		$result = $this->c->getPublished($mf);
-		$this->assertEquals(mfProp($mf, 'updated'), $result);
+		$result = getPublished($mf);
+		$this->assertEquals(getProp($mf, 'updated'), $result);
 	}
 	
 	public function testGetPublishedReturnsNullIfValidDatetimeRequested() {
 		$mf = $this->mf('h-entry', ['published' => 'werty']);
-		$result = $this->c->getPublished($mf, true);
+		$result = getPublished($mf, true);
 		$this->assertNull($result);
 	}
 	
 	public function testGetPublishedReturnsNullIfNoPotentialValueFound() {
 		$mf = $this->mf('h-entry', []);
-		$result = $this->c->getPublished($mf);
+		$result = getPublished($mf);
 		$this->assertNull($result);
+	}
+	
+	public function testGetAuthorPassesIfAuthorPresent() {
+		$mf = $this->mf('h-entry', ['author' => [$this->mf('h-card', ['name' => 'Me'])]]);
+		$result = getAuthor($mf);
+		$this->assertEquals('Me', getProp($result, 'name'));
 	}
 }

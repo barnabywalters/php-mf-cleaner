@@ -8,9 +8,7 @@
         "phpunit/phpunit": "*"
     },
 	  "autoload": {
-			"psr-0": {
-				"BarnabyWalters\\Mf2\\Cleaner": "src/"
-			}
+			"files": ["src/BarnabyWalters/Mf2/Functions.php"]
 		},
     "license": "MIT",
     "authors": [
