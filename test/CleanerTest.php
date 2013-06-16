@@ -10,11 +10,32 @@ use PHPUnit_Framework_TestCase;
  * @author barnabywalters
  */
 class CleanerTest extends PHPUnit_Framework_TestCase {
-	/** @var Cleaner **/
-	protected $c;
+	public function testIsMicroformatReturnsFalseIfNotArray() {
+		$this->assertFalse(isMicroformat(''));
+	}
 	
-	public function setUp() {
-		parent::setUp();
+	public function testIsMicroformatReturnsFalseIfContainsNonArrayValues() {
+		$this->assertFalse(isMicroformat([[], '']));
+	}
+	
+	public function testIsMicroformatReturnsFalseIfTypeMissing() {
+		$this->assertFalse(isMicroformat(['properties' => []]));
+	}
+	
+	public function testIsMicroformatReturnsFalseIfPropertiesMissing() {
+		$this->assertFalse(isMicroformat(['type' => ['h-thing']]));
+	}
+	
+	public function testIsMicroformatReturnsFalseIfHasNumericKeys() {
+		$this->assertFalse(isMicroformat([[], 'thing' => []]));
+	}
+	
+	public function testHasNumericKeysWorks() {
+		$withNumericKeys = ['a', 'b', 'c'];
+		$noNumericKeys = ['key' => 'value'];
+		
+		$this->assertTrue(hasNumericKeys($withNumericKeys));
+		$this->assertFalse(hasNumericKeys($noNumericKeys));
 	}
 	
 	public function mf($name, array $properties) {
@@ -83,31 +104,38 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('Me', getProp($result, 'name'));
 	}
 	
-	public function testIsMicroformatReturnsFalseIfNotArray() {
-		$this->assertFalse(isMicroformat(''));
-	}
-	
-	public function testIsMicroformatReturnsFalseIfContainsNonArrayValues() {
-		$this->assertFalse(isMicroformat([[], '']));
-	}
-	
-	public function testIsMicroformatReturnsFalseIfTypeMissing() {
-		$this->assertFalse(isMicroformat(['properties' => []]));
-	}
-	
-	public function testIsMicroformatReturnsFalseIfPropertiesMissing() {
-		$this->assertFalse(isMicroformat(['type' => ['h-thing']]));
-	}
-	
-	public function testIsMicroformatReturnsFalseIfHasNumericKeys() {
-		$this->assertFalse(isMicroformat([[], 'thing' => []]));
-	}
-	
-	public function testHasNumericKeysWorks() {
-		$withNumericKeys = ['a', 'b', 'c'];
-		$noNumericKeys = ['key' => 'value'];
+	public function testFindMicroformatsByTypeFindsRootMicroformats() {
+		$mfs = [
+			'items' => [[
+				'type' => ['h-card'],
+				'properties' => [
+					'name' => ['me']
+				]
+			]]
+		];
 		
-		$this->assertTrue(hasNumericKeys($withNumericKeys));
-		$this->assertFalse(hasNumericKeys($noNumericKeys));
+		$result = findMicroformatsByType($mfs, 'h-card');
+		$this->assertEquals('me', getProp($result[0], 'name'));
+	}
+	
+	public function testFlattenMicroformatsReturnsFlatArrayOfMicroformats() {
+		$org = $this->mf('h-card', ['name' => 'organisation']);
+		$card = $this->mf('h-card', ['name' => 'me', 'org' => [$org]]);
+		$entry = $this->mf('h-entry', ['name' => 'blog posting']);
+		$card['children'] = [$entry];
+		
+		$mfs = [
+			'items' => [$card]
+		];
+		
+		$result = flattenMicroformats($mfs);
+	}
+	
+	public function testExpandAuthorExpandsFromLargerHCardsInContext() {
+		$this->markTestSkipped();
+	}
+	
+	public function testMergeMicroformatsRecursivelyMerges() {
+		$this->markTestSkipped();
 	}
 }

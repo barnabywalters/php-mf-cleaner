@@ -110,3 +110,52 @@ function getAuthor(array $mf) {
 	if (hasProp($mf, 'reviewer'))
 		return getProp($mf, 'reviewer');
 }
+
+function flattenMicroformatProperties(array $mf) {
+	$items = [];
+	
+	foreach ($mf['properties'] as $propArray) {
+		foreach ($propArray as $prop) {
+			if (isMicroformat($prop)) {
+				$items[] = $prop;
+				array_merge($items, flattenMicroformat($prop));
+			}
+		}
+	}
+	
+	return $items;
+}
+
+function flattenMicroformats(array $mfs) {
+	if (isset($mfs['items']))
+		$mfs = $mfs['items'];
+	elseif (isMicroformat($mfs))
+		$mfs = [$mfs];
+	
+	foreach ($mfs as $mf) {
+		$items[] = $mf;
+		
+		array_merge($items, flattenMicroformatProperties($mf));
+		
+		if (empty($mf['children']))
+			continue;
+		
+		foreach ($mf['children'] as $child) {
+			$items[] = $child;
+			array_merge($items, flattenMicroformatProperties($child));
+		}
+	}
+	
+	return $items;
+}
+
+function findMicroformatsByType(array $mfs, $name) {
+	if (isset($mfs['items']) and is_array($mfs['items']))
+		$items = flattenMicroformats($mfs);
+	else
+		$items = $mfs;
+	
+	return array_values(array_filter($items, function ($mf) use ($name) {
+		return in_array($name, $mf['type']);
+	}));
+}
