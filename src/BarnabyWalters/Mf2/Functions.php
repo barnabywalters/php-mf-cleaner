@@ -14,7 +14,7 @@ function isMicroformat($mf) {
 	if (!is_array($mf))
 		return false;
 	
-	// Children must be arrays
+	// values must be arrays
 	if (count(array_filter($mf, function ($item) { return !is_array($item); })) !== 0)
 		return false;
 	
@@ -25,7 +25,7 @@ function isMicroformat($mf) {
 	if (empty($mf['type']))
 		return false;
 	
-	if (!isset($mf['properties']));
+	if (!isset($mf['properties']))
 		return false;
 	
 	return true;
@@ -127,11 +127,14 @@ function getAuthor(array $mf) {
 function flattenMicroformatProperties(array $mf) {
 	$items = [];
 	
+	if (!isMicroformat($mf))
+		print_r($mf);
+	
 	foreach ($mf['properties'] as $propArray) {
 		foreach ($propArray as $prop) {
 			if (isMicroformat($prop)) {
 				$items[] = $prop;
-				array_merge($items, flattenMicroformat($prop));
+				array_merge($items, flattenMicroformatProperties($prop));
 			}
 		}
 	}
@@ -140,7 +143,7 @@ function flattenMicroformatProperties(array $mf) {
 }
 
 function flattenMicroformats(array $mfs) {
-	if (isset($mfs['items']))
+	if (isMicroformatCollection($mfs))
 		$mfs = $mfs['items'];
 	elseif (isMicroformat($mfs))
 		$mfs = [$mfs];
@@ -163,9 +166,7 @@ function flattenMicroformats(array $mfs) {
 }
 
 function findMicroformatsByType(array $mfs, $name) {
-	if (isset($mfs['items']) and is_array($mfs['items']))
-		$items = flattenMicroformats($mfs);
-	elseif (isMicroformat($mfs))
+	if (isMicroformatCollection($mfs) or isMicroformat($mfs))
 		$items = flattenMicroformats($mfs);
 	else
 		$items = $mfs;
@@ -176,5 +177,10 @@ function findMicroformatsByType(array $mfs, $name) {
 }
 
 function findMicroformatsByProperty(array $mfs, $propName, $propValue) {
+	if (isMicroformat($mfs) or isMicroformatCollection($mfs))
+		$items = flattenMicroformats($mfs);
+	else
+		$items = $mfs;
+	
 	
 }

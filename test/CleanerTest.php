@@ -138,9 +138,7 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 	
 	public function testFindMicroformatsByProperty() {
 		$mfs = [
-			'items' => [[
-				'name' => 'Me'
-			]]
+			'items' => [$this->mf('h-card', ['name' => 'Me'])]
 		];
 		
 		$results = findMicroformatsByProperty($mfs, 'name', 'Me');
