@@ -112,13 +112,19 @@ function getDateTimeProperty($name, array $mf, $ensureValid = false, $fallback =
 	}
 }
 
-// TODO: make this much more intelligent
-function getAuthor(array $mf) {
-	if (hasProp($mf, 'author'))
-		return getProp($mf, 'author');
+function getAuthor(array $mf, array $context = null) {
+	$entryAuthor = null;
 	
-	if (hasProp($mf, 'reviewer'))
-		return getProp($mf, 'reviewer');
+	if (hasProp($mf, 'author'))
+		$entryAuthor = getProp($mf, 'author');
+	elseif (hasProp($mf, 'reviewer'))
+		$entryAuthor = getProp($mf, 'reviewer');
+	
+	if (is_string($entryAuthor)) {
+		// TODO: look through all page h-cards for one with this name
+	} elseif (null === $entryAuthor) {
+		// TODO: look for page-wide rel-author, h-card with that
+	}
 }
 
 function flattenMicroformatProperties(array $mf) {
@@ -162,13 +168,13 @@ function flattenMicroformats(array $mfs) {
 	return $items;
 }
 
-function findMicroformatsByType(array $mfs, $name) {
+function findMicroformatsByType(array $mfs, $name, $flatten = true) {
 	return findMicroformatsByCallable($mfs, function ($mf) use ($name) {
 		return in_array($name, $mf['type']);
-	});
+	}, $flatten);
 }
 
-function findMicroformatsByProperty(array $mfs, $propName, $propValue) {
+function findMicroformatsByProperty(array $mfs, $propName, $propValue, $flatten = true) {
 	return findMicroformatsByCallable($mfs, function ($mf) use ($propName, $propValue) {
 		if (!hasProp($mf, $propName))
 			return false;
@@ -177,14 +183,14 @@ function findMicroformatsByProperty(array $mfs, $propName, $propValue) {
 			return true;
 		
 		return false;
-	});
+	}, $flatten);
 }
 
-function findMicroformatsByCallable(array $mfs, $callable) {
+function findMicroformatsByCallable(array $mfs, $callable, $flatten = true) {
 	if (!is_callable($callable))
 		throw new \InvalidArgumentException('$callable must be callable');
 	
-	if (isMicroformat($mfs) or isMicroformatCollection($mfs))
+	if ($flatten and (isMicroformat($mfs) or isMicroformatCollection($mfs)))
 		$mfs = flattenMicroformats($mfs);
 	
 	return array_values(array_filter($mfs, $callable));
