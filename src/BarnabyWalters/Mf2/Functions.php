@@ -192,3 +192,13 @@ function findMicroformatsByProperty(array $mfs, $propName, $propValue) {
 		return false;
 	}));
 }
+
+function findMicroformatsByCallable(array $mfs, $callable) {
+	if (!is_callable($callable))
+		throw new \InvalidArgumentException('$callable must be callable');
+	
+	if (isMicroformat($mfs) or isMicroformatCollection($mfs))
+		$mfs = flattenMicroformats ($mfs);
+	
+	return array_values(array_filter($mfs, $callable));
+}

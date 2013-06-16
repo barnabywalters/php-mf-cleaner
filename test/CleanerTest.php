@@ -2,6 +2,7 @@
 
 namespace BarnabyWalters\Mf2;
 
+use BarnabyWalters\Helpers\Helpers as H;
 use PHPUnit_Framework_TestCase;
 
 /**
@@ -146,6 +147,28 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 		];
 		
 		$results = findMicroformatsByProperty($mfs, 'name', 'Me');
+		$this->assertEquals(1, count($results));
+	}
+	
+	public function testFindMicroformatsByCallable() {
+		$mfs = [
+			'items' => [$this->mf('h-card', ['url' => 'http://waterpigs.co.uk/'])]
+		];
+		
+		$results = findMicroformatsByCallable($mfs, function ($mf) {
+			if (!hasProp($mf, 'url'))
+				return false;
+			
+			$urls = $mf['properties']['url'];
+			
+			foreach ($urls as $url) {
+				if (H::sameHostname($url, 'http://waterpigs.co.uk'))
+					return true;
+			}
+			
+			return false;
+		});
+		
 		$this->assertEquals(1, count($results));
 	}
 	
