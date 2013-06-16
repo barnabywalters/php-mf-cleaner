@@ -27,11 +27,24 @@ class Cleaner {
 			return substr(strip_tags(mfProp($mf, 'content')), 0, 19) . '…';
 	}
 	
+	/**
+	 * Get Published Datetime
+	 * 
+	 * Given a mf2 structure, tries to approximate the datetime it was published. 
+	 * If $ensureValid is true, will return null if the found value can’t be parsed
+	 * by DateTime
+	 * 
+	 * @param array $mf individual mf2 array structure
+	 * @param bool $ensureValid whether or not to check whether or not the potential return value can be parsed as a DateTime
+	 * @return string|null
+	 */
 	public function getPublished(array $mf, $ensureValid = false) {
 		if (mfHasProp($mf, 'published'))
 			$return = mfProp($mf, 'published');
 		elseif (mfHasProp($mf, 'updated'))
 			$return = mfProp($mf, 'updated');
+		else
+			return null;
 		
 		if (!$ensureValid)
 			return $return;

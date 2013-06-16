@@ -71,4 +71,10 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 		$result = $this->c->getPublished($mf, true);
 		$this->assertNull($result);
 	}
+	
+	public function testGetPublishedReturnsNullIfNoPotentialValueFound() {
+		$mf = $this->mf('h-entry', []);
+		$result = $this->c->getPublished($mf);
+		$this->assertNull($result);
+	}
 }
