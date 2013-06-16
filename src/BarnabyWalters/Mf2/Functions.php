@@ -14,10 +14,6 @@ function isMicroformat($mf) {
 	if (!is_array($mf))
 		return false;
 	
-	// values must be arrays
-	if (count(array_filter($mf, function ($item) { return !is_array($item); })) !== 0)
-		return false;
-	
 	// No numeric keys
 	if (hasNumericKeys($mf))
 		return false;
@@ -116,6 +112,7 @@ function getDateTimeProperty($name, array $mf, $ensureValid = false, $fallback =
 	}
 }
 
+// TODO: make this much more intelligent
 function getAuthor(array $mf) {
 	if (hasProp($mf, 'author'))
 		return getProp($mf, 'author');

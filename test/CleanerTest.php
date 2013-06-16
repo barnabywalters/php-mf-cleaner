@@ -34,10 +34,6 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 		$this->assertFalse(isMicroformat(''));
 	}
 	
-	public function testIsMicroformatReturnsFalseIfContainsNonArrayValues() {
-		$this->assertFalse(isMicroformat([[], '']));
-	}
-	
 	public function testIsMicroformatReturnsFalseIfTypeMissing() {
 		$this->assertFalse(isMicroformat(['properties' => []]));
 	}
@@ -48,6 +44,14 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 	
 	public function testIsMicroformatReturnsFalseIfHasNumericKeys() {
 		$this->assertFalse(isMicroformat([[], 'thing' => []]));
+	}
+	
+	public function testIsMicroformatReturnsTrueIfValueIsSet() {
+		$this->assertTrue(isMicroformat([
+			'type' => ['h-card'],
+			'properties' => [],
+			'value' => 'a string'
+		]));
 	}
 	
 	public function testHasNumericKeysWorks() {
