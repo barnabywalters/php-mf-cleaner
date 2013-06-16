@@ -182,5 +182,13 @@ function findMicroformatsByProperty(array $mfs, $propName, $propValue) {
 	else
 		$items = $mfs;
 	
-	
+	return array_values(array_filter($items, function ($mf) use ($propName, $propValue) {
+		if (!hasProp($mf, $propName))
+			return false;
+		
+		if (in_array($propValue, $mf['properties'][$propName]))
+			return true;
+		
+		return false;
+	}));
 }
