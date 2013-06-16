@@ -7,6 +7,11 @@
     "require-dev": {
         "phpunit/phpunit": "*"
     },
+	  "autoload": {
+			"psr-0": {
+				"BarnabyWalters\\Mf2\\Cleaner": "src/"
+			}
+		},
     "license": "MIT",
     "authors": [
         {
