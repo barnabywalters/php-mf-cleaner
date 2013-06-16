@@ -177,6 +177,14 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(1, count($results));
 	}
 	
+	public function testFindMicroformatsSearchesSingleMicroformatStructure() {
+		$card = $this->mf('h-card', ['name' => 'Me']);
+		$entry = $this->mf('h-entry', ['author' => [$card], 'name' => 'entry']);
+		
+		$results = findMicroformatsByType($entry, 'h-card');
+		$this->assertEquals(1, count($results));
+	}	
+	
 	public function testExpandAuthorExpandsFromLargerHCardsInContext() {
 		$this->markTestSkipped();
 	}

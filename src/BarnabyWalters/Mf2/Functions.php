@@ -188,7 +188,7 @@ function findMicroformatsByCallable(array $mfs, $callable) {
 		throw new \InvalidArgumentException('$callable must be callable');
 	
 	if (isMicroformat($mfs) or isMicroformatCollection($mfs))
-		$mfs = flattenMicroformats ($mfs);
+		$mfs = flattenMicroformats($mfs);
 	
 	return array_values(array_filter($mfs, $callable));
 }
