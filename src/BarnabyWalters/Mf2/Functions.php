@@ -166,23 +166,13 @@ function flattenMicroformats(array $mfs) {
 }
 
 function findMicroformatsByType(array $mfs, $name) {
-	if (isMicroformatCollection($mfs) or isMicroformat($mfs))
-		$items = flattenMicroformats($mfs);
-	else
-		$items = $mfs;
-	
-	return array_values(array_filter($items, function ($mf) use ($name) {
+	return findMicroformatsByCallable($mfs, function ($mf) use ($name) {
 		return in_array($name, $mf['type']);
-	}));
+	});
 }
 
 function findMicroformatsByProperty(array $mfs, $propName, $propValue) {
-	if (isMicroformat($mfs) or isMicroformatCollection($mfs))
-		$items = flattenMicroformats($mfs);
-	else
-		$items = $mfs;
-	
-	return array_values(array_filter($items, function ($mf) use ($propName, $propValue) {
+	return findMicroformatsByCallable($mfs, function ($mf) use ($propName, $propValue) {
 		if (!hasProp($mf, $propName))
 			return false;
 		
@@ -190,7 +180,7 @@ function findMicroformatsByProperty(array $mfs, $propName, $propValue) {
 			return true;
 		
 		return false;
-	}));
+	});
 }
 
 function findMicroformatsByCallable(array $mfs, $callable) {
