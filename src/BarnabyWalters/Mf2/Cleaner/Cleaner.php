@@ -2,6 +2,14 @@
 
 namespace BarnabyWalters\Mf2\Cleaner;
 
+function mfHasProp(array $mf, $propName) {
+	return !empty($mf['properties'][$propName]) and is_array($mf['properties'][$propName]);
+}
+
+function mfProp(array $mf, $propName) {
+	return current($mf['properties'][$propName]);
+}
+
 /**
  * Cleaner
  *
@@ -9,10 +17,14 @@ namespace BarnabyWalters\Mf2\Cleaner;
  */
 class Cleaner {
 	public function getSummary($mf, $url = null) {
-		if (!empty($mf['properties']['summary']))
-			return current($mf['properties']['summary']);
+		if (mfHasProp($mf, 'summary'))
+			return mfProp($mf, 'summary');
 		
 		if (!empty($mf['properties']['content']))
-			return substr(strip_tags(current($mf['properties']['content'])), 0, 19) . '…';
+			return substr(strip_tags(mfProp($mf, 'content')), 0, 19) . '…';
+	}
+	
+	public function getPublished($mf) {
+		
 	}
 }

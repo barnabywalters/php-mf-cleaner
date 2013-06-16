@@ -54,5 +54,9 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('Hello hello hello t…', $result);
 	}
 	
-	
+	public function testGetPublishedPassesIfPublishedPresent() {
+		$mf = $this->mf('h-entry', ['published' => '2013-12-06']);
+		$result = $this->c->getPublished($mf);
+		$this->assertEquals(mfProp($mf, 'published'), $result);
+	}
 }
