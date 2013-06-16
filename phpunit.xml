@@ -1,5 +1,5 @@
 <phpunit backupGlobals="true"
-         bootstrap="tests/bootstrap.php"
+         bootstrap="test/bootstrap.php"
          backupStaticAttributes="false"
          cacheTokens="false"
          colors="false"
@@ -18,7 +18,7 @@
          verbose="false">
     <testsuites>
         <testsuite name="Test Suite">
-            <directory suffix="Test.php">tests/</directory>
+            <directory suffix="Test.php">test/</directory>
         </testsuite>
     </testsuites>
     <logging>
