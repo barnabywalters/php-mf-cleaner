@@ -104,6 +104,11 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 		$this->assertNull($result);
 	}
 	
+	public function testGetPublishedReturnsFallbackIfProvided() {
+		$mf = $this->mf('h-entry', []);
+		$this->assertEquals('fallback', getPublished($mf, true, 'fallback'));
+	}
+	
 	public function testGetAuthorPassesIfAuthorPresent() {
 		$mf = $this->mf('h-entry', ['author' => [$this->mf('h-card', ['name' => 'Me'])]]);
 		$result = getAuthor($mf);

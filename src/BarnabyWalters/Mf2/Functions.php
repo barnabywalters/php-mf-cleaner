@@ -74,8 +74,8 @@ function getSummary(array $mf, $url = null) {
  * @param bool $ensureValid whether or not to check whether or not the potential return value can be parsed as a DateTime
  * @return string|null
  */
-function getPublished(array $mf, $ensureValid = false) {
-	return getDateTimeProperty('published', $mf, $ensureValid);
+function getPublished(array $mf, $ensureValid = false, $fallback = null) {
+	return getDateTimeProperty('published', $mf, $ensureValid, $fallback);
 }
 
 /**
@@ -90,11 +90,11 @@ function getPublished(array $mf, $ensureValid = false) {
  * @param bool $ensureValid whether or not to check whether or not the potential return value can be parsed as a DateTime
  * @return string|null
  */
-function getUpdated(array $mf, $ensureValid = false) {
-	return getDateTimeProperty('updated', $mf, $ensureValid);
+function getUpdated(array $mf, $ensureValid = false, $fallback = null) {
+	return getDateTimeProperty('updated', $mf, $ensureValid, $fallback);
 }
 
-function getDateTimeProperty($name, array $mf, $ensureValid = false) {
+function getDateTimeProperty($name, array $mf, $ensureValid = false, $fallback = null) {
 	$compliment = 'published' === $name ? 'updated' : 'published';
 
 	if (hasProp($mf, $name))
@@ -102,7 +102,7 @@ function getDateTimeProperty($name, array $mf, $ensureValid = false) {
 	elseif (hasProp($mf, $compliment))
 		$return = getProp($mf, $compliment);
 	else
-		return null;
+		return $fallback;
 
 	if (!$ensureValid)
 		return $return;
@@ -111,7 +111,7 @@ function getDateTimeProperty($name, array $mf, $ensureValid = false) {
 			new Carbon($return);
 			return $return;
 		} catch (Exception $e) {
-			return null;
+			return $fallback;
 		}
 	}
 }
