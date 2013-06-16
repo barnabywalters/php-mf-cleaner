@@ -128,13 +128,13 @@ function flattenMicroformatProperties(array $mf) {
 	$items = [];
 	
 	if (!isMicroformat($mf))
-		print_r($mf);
+		return $items;
 	
 	foreach ($mf['properties'] as $propArray) {
 		foreach ($propArray as $prop) {
 			if (isMicroformat($prop)) {
 				$items[] = $prop;
-				array_merge($items, flattenMicroformatProperties($prop));
+				$items = array_merge($items, flattenMicroformatProperties($prop));
 			}
 		}
 	}
@@ -151,14 +151,14 @@ function flattenMicroformats(array $mfs) {
 	foreach ($mfs as $mf) {
 		$items[] = $mf;
 		
-		array_merge($items, flattenMicroformatProperties($mf));
+		$items = array_merge($items, flattenMicroformatProperties($mf));
 		
 		if (empty($mf['children']))
 			continue;
 		
 		foreach ($mf['children'] as $child) {
 			$items[] = $child;
-			array_merge($items, flattenMicroformatProperties($child));
+			$items = array_merge($items, flattenMicroformatProperties($child));
 		}
 	}
 	

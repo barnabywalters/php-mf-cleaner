@@ -134,6 +134,10 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 		];
 		
 		$result = flattenMicroformats($mfs);
+		
+		$this->assertTrue(in_array($org, $result));
+		$this->assertTrue(in_array($card, $result));
+		$this->assertTrue(in_array($entry, $result));
 	}
 	
 	public function testFindMicroformatsByProperty() {
