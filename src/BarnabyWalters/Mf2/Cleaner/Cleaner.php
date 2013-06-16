@@ -16,7 +16,7 @@ function mfProp(array $mf, $propName) {
  * @author barnabywalters
  */
 class Cleaner {
-	public function getSummary($mf, $url = null) {
+	public function getSummary(array $mf, $url = null) {
 		if (mfHasProp($mf, 'summary'))
 			return mfProp($mf, 'summary');
 		
@@ -24,7 +24,8 @@ class Cleaner {
 			return substr(strip_tags(mfProp($mf, 'content')), 0, 19) . '…';
 	}
 	
-	public function getPublished($mf) {
-		
+	public function getPublished(array $mf) {
+		if (mfHasProp($mf, 'published'))
+			return mfProp($mf, 'published');
 	}
 }
