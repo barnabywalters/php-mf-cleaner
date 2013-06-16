@@ -152,6 +152,8 @@ function flattenMicroformats(array $mfs) {
 function findMicroformatsByType(array $mfs, $name) {
 	if (isset($mfs['items']) and is_array($mfs['items']))
 		$items = flattenMicroformats($mfs);
+	elseif (isMicroformat($mfs))
+		$items = flattenMicroformats($mfs);
 	else
 		$items = $mfs;
 	
