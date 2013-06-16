@@ -65,4 +65,10 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 		$result = $this->c->getPublished($mf);
 		$this->assertEquals(mfProp($mf, 'updated'), $result);
 	}
+	
+	public function testGetPublishedReturnsNullIfValidDatetimeRequested() {
+		$mf = $this->mf('h-entry', ['published' => 'werty']);
+		$result = $this->c->getPublished($mf, true);
+		$this->assertNull($result);
+	}
 }

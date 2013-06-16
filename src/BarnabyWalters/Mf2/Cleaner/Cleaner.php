@@ -2,6 +2,9 @@
 
 namespace BarnabyWalters\Mf2\Cleaner;
 
+use DateTime;
+use Exception;
+
 function mfHasProp(array $mf, $propName) {
 	return !empty($mf['properties'][$propName]) and is_array($mf['properties'][$propName]);
 }
@@ -24,11 +27,21 @@ class Cleaner {
 			return substr(strip_tags(mfProp($mf, 'content')), 0, 19) . '…';
 	}
 	
-	public function getPublished(array $mf) {
+	public function getPublished(array $mf, $ensureValid = false) {
 		if (mfHasProp($mf, 'published'))
-			return mfProp($mf, 'published');
+			$return = mfProp($mf, 'published');
+		elseif (mfHasProp($mf, 'updated'))
+			$return = mfProp($mf, 'updated');
 		
-		if (mfHasProp($mf, 'updated'))
-			return mfProp($mf, 'updated');
+		if (!$ensureValid)
+			return $return;
+		else {
+			try {
+				new DateTime($return);
+				return $return;
+			} catch (Exception $e) {
+				return null;
+			}
+		}
 	}
 }
