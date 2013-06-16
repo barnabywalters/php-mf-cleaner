@@ -3,9 +3,107 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "f851aa0a5bb46c7ed0bffda33641cca9",
+    "hash": "7119c52ec78632db5df64f5f6d4c85d6",
     "packages": [
-
+        {
+            "name": "barnabywalters/helpers",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/barnabywalters/php-helpers.git",
+                "reference": "v0.1.7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/barnabywalters/php-helpers/zipball/v0.1.7",
+                "reference": "v0.1.7",
+                "shasum": ""
+            },
+            "require": {
+                "nesbot/carbon": "*",
+                "tantek/cassis": "*"
+            },
+            "require-dev": {
+                "doctrine/orm": "*",
+                "guzzle/guzzle": "*",
+                "symfony/event-dispatcher": "2.1.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "BarnabyWalters": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "description": "Yet another library of those damned helper functions.",
+            "time": "2013-06-04 17:36:48"
+        },
+        {
+            "name": "nesbot/carbon",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/briannesbitt/Carbon.git",
+                "reference": "1.2.0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/briannesbitt/Carbon/zipball/1.2.0",
+                "reference": "1.2.0",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Carbon": "."
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Brian Nesbitt",
+                    "email": "brian@nesbot.com",
+                    "homepage": "http://nesbot.com"
+                }
+            ],
+            "description": "A simple API extension for DateTime.",
+            "homepage": "https://github.com/briannesbitt/Carbon",
+            "keywords": [
+                "date",
+                "datetime",
+                "time"
+            ],
+            "time": "2012-10-15 00:41:18"
+        },
+        {
+            "name": "tantek/cassis",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tantek/cassis.git",
+                "reference": "bc080dc4dc13c4a0944e3e422ba1d8b557dbff02"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/tantek/cassis/zipball/bc080dc4dc13c4a0944e3e422ba1d8b557dbff02",
+                "reference": "bc080dc4dc13c4a0944e3e422ba1d8b557dbff02",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "cassis.js"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "time": "2013-06-04 00:20:54"
+        }
     ],
     "packages-dev": [
         {

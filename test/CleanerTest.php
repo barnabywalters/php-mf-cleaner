@@ -1,6 +1,6 @@
 <?php
 
-namespace BarnabyWalters\Mf2\Cleaner;
+namespace BarnabyWalters\Mf2;
 
 use PHPUnit_Framework_TestCase;
 
@@ -81,5 +81,33 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 		$mf = $this->mf('h-entry', ['author' => [$this->mf('h-card', ['name' => 'Me'])]]);
 		$result = getAuthor($mf);
 		$this->assertEquals('Me', getProp($result, 'name'));
+	}
+	
+	public function testIsMicroformatReturnsFalseIfNotArray() {
+		$this->assertFalse(isMicroformat(''));
+	}
+	
+	public function testIsMicroformatReturnsFalseIfContainsNonArrayValues() {
+		$this->assertFalse(isMicroformat([[], '']));
+	}
+	
+	public function testIsMicroformatReturnsFalseIfTypeMissing() {
+		$this->assertFalse(isMicroformat(['properties' => []]));
+	}
+	
+	public function testIsMicroformatReturnsFalseIfPropertiesMissing() {
+		$this->assertFalse(isMicroformat(['type' => ['h-thing']]));
+	}
+	
+	public function testIsMicroformatReturnsFalseIfHasNumericKeys() {
+		$this->assertFalse(isMicroformat([[], 'thing' => []]));
+	}
+	
+	public function testHasNumericKeysWorks() {
+		$withNumericKeys = ['a', 'b', 'c'];
+		$noNumericKeys = ['key' => 'value'];
+		
+		$this->assertTrue(hasNumericKeys($withNumericKeys));
+		$this->assertFalse(hasNumericKeys($noNumericKeys));
 	}
 }

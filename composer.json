@@ -2,7 +2,7 @@
     "name": "barnabywalters/php-mf-cleaner",
     "description": "Cleans up microformats2 array structures",
     "require": {
-        
+        "barnabywalters/helpers": "*"
     },
     "require-dev": {
         "phpunit/phpunit": "*"

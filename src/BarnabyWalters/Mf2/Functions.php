@@ -1,9 +1,35 @@
 <?php
 
-namespace BarnabyWalters\Mf2\Cleaner;
+namespace BarnabyWalters\Mf2;
 
-use DateTime;
+use Carbon\Carbon;
 use Exception;
+
+function hasNumericKeys(array $arr) {
+	$numericKeys = array_filter(array_keys($arr), function ($i) { return is_numeric($i); });
+	return count($numericKeys) !== 0;
+}
+
+function isMicroformat($mf) {
+	if (!is_array($mf))
+		return false;
+	
+	// Children must be arrays
+	if (count(array_filter($mf, function ($item) { return !is_array($item); })) !== 0)
+		return false;
+	
+	// No numeric keys
+	if (hasNumericKeys($mf))
+		return false;
+	
+	if (empty($mf['type']))
+		return false;
+	
+	if (!isset($mf['properties']));
+		return false;
+	
+	return true;
+}
 
 function hasProp(array $mf, $propName) {
 	return !empty($mf['properties'][$propName]) and is_array($mf['properties'][$propName]);
@@ -12,7 +38,7 @@ function hasProp(array $mf, $propName) {
 function getProp(array $mf, $propName, $fallback = null) {
 	if (!empty($mf['properties'][$propName]) and is_array($mf['properties'][$propName]))
 		return current($mf['properties'][$propName]);
-	
+
 	return $fallback;
 }
 
@@ -56,9 +82,7 @@ function getUpdated(array $mf, $ensureValid = false) {
 }
 
 function getDateTimeProperty($name, array $mf, $ensureValid = false) {
-	$compliment = 'published' === $name
-		? 'updated'
-		: 'published';
+	$compliment = 'published' === $name ? 'updated' : 'published';
 
 	if (hasProp($mf, $name))
 		$return = getProp($mf, $name);
@@ -71,7 +95,7 @@ function getDateTimeProperty($name, array $mf, $ensureValid = false) {
 		return $return;
 	else {
 		try {
-			new DateTime($return);
+			new Carbon($return);
 			return $return;
 		} catch (Exception $e) {
 			return null;
@@ -79,7 +103,10 @@ function getDateTimeProperty($name, array $mf, $ensureValid = false) {
 	}
 }
 
-function getAuthor(array $mf, array $context = null) {
+function getAuthor(array $mf) {
 	if (hasProp($mf, 'author'))
 		return getProp($mf, 'author');
+	
+	if (hasProp($mf, 'reviewer'))
+		return getProp($mf, 'reviewer');
 }
