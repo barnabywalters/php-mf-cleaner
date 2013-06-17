@@ -146,6 +146,10 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 		$this->markTestSkipped();
 	}
 	
+	public function testGetAuthorFindsAuthorWithUrlOfPageRelAuthor() {
+		$this->markTestSkipped();
+	}
+	
 	public function testFindMicroformatsByTypeFindsRootMicroformats() {
 		$mfs = [
 			'items' => [[
