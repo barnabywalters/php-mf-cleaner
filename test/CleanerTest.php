@@ -119,6 +119,33 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('Me', getProp($result, 'name'));
 	}
 	
+	public function testGetAuthorFindsSeparateHCardWithSameName() {
+		$nonAuthorCard = $this->mf('h-card', ['name' => 'Someone Else', 'url' => 'http://example.org']);
+		$card = $this->mf('h-card', ['name' => 'Me', 'url' => 'http://waterpigs.co.uk']);
+		$entry = $this->mf('h-entry', ['name' => 'Entry', 'author' => 'Me']);
+		$mfs = [
+			'items' => [$nonAuthorCard, $card, $entry]
+		];
+		
+		$result = getAuthor($entry, $mfs);
+		
+		$this->assertEquals('http://waterpigs.co.uk', getProp($result, 'url'));
+	}
+	
+	public function testGetAuthorFindsSeparateHCardWithSameDomain() {
+		$card = $this->mf('h-card', ['name' => 'Me', 'url' => 'http://waterpigs.co.uk']);
+		$entry = $this->mf('h-entry', ['name' => 'The Entry']);
+		$mfs = ['items' => [$entry, $card]];
+		
+		$result = getAuthor($entry, $mfs, 'http://waterpigs.co.uk/notes/1234');
+		
+		$this->assertEquals('Me', getProp($result, 'name'));
+	}
+	
+	public function testGetAuthorFallsBackToFirstHCard() {
+		$this->markTestSkipped();
+	}
+	
 	public function testFindMicroformatsByTypeFindsRootMicroformats() {
 		$mfs = [
 			'items' => [[

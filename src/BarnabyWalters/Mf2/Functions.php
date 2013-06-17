@@ -113,8 +113,12 @@ function getDateTimeProperty($name, array $mf, $ensureValid = false, $fallback =
 	}
 }
 
+// TODO: maybe split some bits of this out into separate functions
 function getAuthor(array $mf, array $context = null, $url = null) {
 	$entryAuthor = null;
+	
+	if (null === $url and hasProp($mf, 'url'))
+		$url = getProp($mf, 'url');
 	
 	if (hasProp($mf, 'author'))
 		$entryAuthor = getProp($mf, 'author');
@@ -140,7 +144,7 @@ function getAuthor(array $mf, array $context = null, $url = null) {
 	if (null !== $entryAuthor)
 		return $entryAuthor;
 	
-// TODO: look for page-wide rel-author, h-card with that
+	// TODO: look for page-wide rel-author, h-card with that
 
 	// look for h-card with same hostname as $url if given
 	if (null !== $url) {
