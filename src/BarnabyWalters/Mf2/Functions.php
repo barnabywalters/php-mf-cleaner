@@ -2,6 +2,7 @@
 
 namespace BarnabyWalters\Mf2;
 
+use BarnabyWalters\Helpers\Helpers as H;
 use Carbon\Carbon;
 use Exception;
 
@@ -112,7 +113,7 @@ function getDateTimeProperty($name, array $mf, $ensureValid = false, $fallback =
 	}
 }
 
-function getAuthor(array $mf, array $context = null) {
+function getAuthor(array $mf, array $context = null, $url = null) {
 	$entryAuthor = null;
 	
 	if (hasProp($mf, 'author'))
@@ -120,11 +121,47 @@ function getAuthor(array $mf, array $context = null) {
 	elseif (hasProp($mf, 'reviewer'))
 		$entryAuthor = getProp($mf, 'reviewer');
 	
+	// If we have no context that’s the best we can do
+	if (null === $context)
+		return $entryAuthor;
+	
+	// Whatever happens after this we’ll need these
+	$flattenedMf = flattenMicroformats($context);
+	$hCards = findMicroformatsByType($flattenedMf, 'h-card', false);
+	
 	if (is_string($entryAuthor)) {
-		// TODO: look through all page h-cards for one with this name
-	} elseif (null === $entryAuthor) {
-		// TODO: look for page-wide rel-author, h-card with that
+		// look through all page h-cards for one with this name
+		$authorHCards = findMicroformatsByProperty($hCards, 'name', $entryAuthor, false);
+		
+		if (!empty($authorHCards))
+			$entryAuthor = current($authorHCards);
 	}
+	
+	if (null !== $entryAuthor)
+		return $entryAuthor;
+	
+// TODO: look for page-wide rel-author, h-card with that
+
+	// look for h-card with same hostname as $url if given
+	if (null !== $url) {
+		$sameHostnameHCards = findMicroformatsByCallable($flattenedMf, function ($mf) use ($url) {
+			if (!hasProp($mf, 'url'))
+				return false;
+
+			foreach ($mf['properties']['url'] as $u) {
+				if (H::sameHostname($url, $u))
+					return true;
+			}
+		}, false);
+
+		if (!empty($sameHostnameHCards))
+			return current($sameHostnameHCards);
+	}
+
+	// *sigh* return the first h-card or null
+	return empty($hCards)
+		? null
+		: $hCards[0];
 }
 
 function flattenMicroformatProperties(array $mf) {
