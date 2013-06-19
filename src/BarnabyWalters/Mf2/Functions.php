@@ -169,7 +169,7 @@ function getAuthor(array $mf, array $context = null, $url = null) {
 }
 
 function flattenMicroformatProperties(array $mf) {
-	$items = [];
+	$items = array();
 	
 	if (!isMicroformat($mf))
 		return $items;
