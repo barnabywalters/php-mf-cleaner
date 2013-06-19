@@ -190,7 +190,7 @@ function flattenMicroformats(array $mfs) {
 	if (isMicroformatCollection($mfs))
 		$mfs = $mfs['items'];
 	elseif (isMicroformat($mfs))
-		$mfs = [$mfs];
+		$mfs = array($mfs);
 	
 	foreach ($mfs as $mf) {
 		$items[] = $mf;
