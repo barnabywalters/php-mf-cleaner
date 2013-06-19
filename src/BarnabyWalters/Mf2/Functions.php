@@ -52,7 +52,7 @@ function getProp(array $mf, $propName, $fallback = null) {
 	return $fallback;
 }
 
-function getSummary(array $mf, $url = null) {
+function getSummary(array $mf) {
 	if (hasProp($mf, 'summary'))
 		return getProp($mf, 'summary');
 

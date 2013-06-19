@@ -6,7 +6,8 @@
 				"nesbot/carbon": "1.2"
     },
     "require-dev": {
-        "phpunit/phpunit": "*"
+        "phpunit/phpunit": "*",
+				"php": ">=5.3"
     },
 	  "autoload": {
 			"files": ["src/BarnabyWalters/Mf2/Functions.php"]
