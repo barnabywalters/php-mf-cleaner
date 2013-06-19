@@ -169,7 +169,7 @@ function getAuthor(array $mf, array $context = null, $url = null) {
 }
 
 function flattenMicroformatProperties(array $mf) {
-	$items = [];
+	$items = array();
 	
 	if (!isMicroformat($mf))
 		return $items;
@@ -190,7 +190,7 @@ function flattenMicroformats(array $mfs) {
 	if (isMicroformatCollection($mfs))
 		$mfs = $mfs['items'];
 	elseif (isMicroformat($mfs))
-		$mfs = [$mfs];
+		$mfs = array($mfs);
 	
 	foreach ($mfs as $mf) {
 		$items[] = $mf;
