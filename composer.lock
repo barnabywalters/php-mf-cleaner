@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "7119c52ec78632db5df64f5f6d4c85d6",
+    "hash": "20d146fd4184a2a209ae6fe75efd7b42",
     "packages": [
         {
             "name": "barnabywalters/helpers",
@@ -40,15 +40,15 @@
         },
         {
             "name": "nesbot/carbon",
-            "version": "dev-master",
+            "version": "1.2.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/briannesbitt/Carbon.git",
+                "url": "git://github.com/briannesbitt/Carbon.git",
                 "reference": "1.2.0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/briannesbitt/Carbon/zipball/1.2.0",
+                "url": "https://github.com/briannesbitt/Carbon/zipball/1.2.0",
                 "reference": "1.2.0",
                 "shasum": ""
             },
@@ -79,7 +79,7 @@
                 "datetime",
                 "time"
             ],
-            "time": "2012-10-15 00:41:18"
+            "time": "2012-10-14 17:41:18"
         },
         {
             "name": "tantek/cassis",
@@ -352,12 +352,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "892f497047822ccd3c3341a4f130080fd97ac7dc"
+                "reference": "c80a5245646c8f55c66d882e1fc68fa952981e2f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/892f497047822ccd3c3341a4f130080fd97ac7dc",
-                "reference": "892f497047822ccd3c3341a4f130080fd97ac7dc",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/c80a5245646c8f55c66d882e1fc68fa952981e2f",
+                "reference": "c80a5245646c8f55c66d882e1fc68fa952981e2f",
                 "shasum": ""
             },
             "require": {
@@ -421,7 +421,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2013-06-07 08:07:41"
+            "time": "2013-06-18 15:50:46"
         },
         {
             "name": "phpunit/phpunit-mock-objects",
