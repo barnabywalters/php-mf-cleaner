@@ -143,7 +143,13 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 	}
 	
 	public function testGetAuthorFallsBackToFirstHCard() {
-		$this->markTestSkipped();
+		$cards = [$this->mf('h-card', ['name' => 'Bill']), $this->mf('h-card', ['name' => 'James'])];
+		$entry = $this->mf('h-entry', ['name' => 'Entry']);
+		$mfs = ['items' => $cards];
+		
+		$result = getAuthor($entry, $mfs);
+		
+		$this->assertEquals($cards[0], $result);
 	}
 	
 	public function testGetAuthorFindsAuthorWithUrlOfPageRelAuthor() {

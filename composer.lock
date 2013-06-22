@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "20d146fd4184a2a209ae6fe75efd7b42",
+    "hash": "501528f55ba4c2fb567f8113a8ced2ed",
     "packages": [
         {
             "name": "barnabywalters/helpers",
@@ -11,12 +11,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/barnabywalters/php-helpers.git",
-                "reference": "v0.1.7"
+                "reference": "df60bb0ed299137555550e4e4be4755a84995de4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/barnabywalters/php-helpers/zipball/v0.1.7",
-                "reference": "v0.1.7",
+                "url": "https://api.github.com/repos/barnabywalters/php-helpers/zipball/df60bb0ed299137555550e4e4be4755a84995de4",
+                "reference": "df60bb0ed299137555550e4e4be4755a84995de4",
                 "shasum": ""
             },
             "require": {
@@ -36,7 +36,7 @@
             },
             "notification-url": "https://packagist.org/downloads/",
             "description": "Yet another library of those damned helper functions.",
-            "time": "2013-06-04 17:36:48"
+            "time": "2013-06-19 10:39:21"
         },
         {
             "name": "nesbot/carbon",
@@ -686,7 +686,7 @@
     "platform": [
 
     ],
-    "platform-dev": [
-
-    ]
+    "platform-dev": {
+        "php": ">=5.3"
+    }
 }
