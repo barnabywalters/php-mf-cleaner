@@ -153,7 +153,18 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 	}
 	
 	public function testGetAuthorFindsAuthorWithUrlOfPageRelAuthor() {
-		$this->markTestSkipped();
+		$cards = [$this->mf('h-card', ['name' => 'N. T. Author']), $this->mf('h-card', ['name' => 'The Author', 'url' => 'http://example.com'])];
+		$entry = $this->mf('h-entry', ['name' => 'Entry']);
+		$mfs = [
+			'items' => $cards,
+			'rels' => [
+				'author' => ['http://example.com']
+			]
+		];
+		
+		$result = getAuthor($entry, $mfs);
+		
+		$this->assertEquals($cards[1], $result);
 	}
 	
 	public function testFindMicroformatsByTypeFindsRootMicroformats() {
