@@ -144,7 +144,16 @@ function getAuthor(array $mf, array $context = null, $url = null) {
 	if (null !== $entryAuthor)
 		return $entryAuthor;
 	
-	// TODO: look for page-wide rel-author, h-card with that
+	// look for page-wide rel-author, h-card with that
+	if (!empty($context['rels']) and !empty($context['rels']['author'])) {
+		// Grab first href with rel=author
+		$relAuthorHref = current($context['rels']['author']);
+		
+		$relAuthorHCards = findMicroformatsByProperty($hCards, 'url', $relAuthorHref);
+		
+		if (!empty($relAuthorHCards))
+			return current($relAuthorHCards);
+	}
 
 	// look for h-card with same hostname as $url if given
 	if (null !== $url) {
