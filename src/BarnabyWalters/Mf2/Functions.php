@@ -7,38 +7,15 @@ use Carbon\Carbon;
 use Exception;
 
 function hasNumericKeys(array $arr) {
-	$numericKeys = array_filter(array_keys($arr), function ($i) { return is_numeric($i); });
-	return count($numericKeys) !== 0;
+	foreach ($arr as $key=>$val) if (is_numeric($key)) return true;
 }
 
 function isMicroformat($mf) {
-	if (!is_array($mf))
-		return false;
-	
-	// No numeric keys
-	if (hasNumericKeys($mf))
-		return false;
-	
-	if (empty($mf['type']))
-		return false;
-	
-	if (!isset($mf['properties']))
-		return false;
-	
-	return true;
+	return (is_array($mf) and !hasNumericKeys($mf) and !empty($mf['type']) and isset($mf['properties']));
 }
 
 function isMicroformatCollection($mf) {
-	if (!is_array($mf))
-		return false;
-	
-	if (!isset($mf['items']))
-		return false;
-	
-	if (!is_array($mf['items']))
-		return false;
-	
-	return true;
+	return (is_array($mf) and isset($mf['items']) and is_array($mf['items']));
 }
 
 function hasProp(array $mf, $propName) {
