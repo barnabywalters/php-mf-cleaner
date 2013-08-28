@@ -178,6 +178,8 @@ function flattenMicroformats(array $mfs) {
 	elseif (isMicroformat($mfs))
 		$mfs = array($mfs);
 	
+	$items = []
+	
 	foreach ($mfs as $mf) {
 		$items[] = $mf;
 		
@@ -192,7 +194,7 @@ function flattenMicroformats(array $mfs) {
 		}
 	}
 	
-	return $items ?: [];
+	return $items;
 }
 
 function findMicroformatsByType(array $mfs, $name, $flatten = true) {
