@@ -192,7 +192,7 @@ function flattenMicroformats(array $mfs) {
 		}
 	}
 	
-	return $items;
+	return $items ?: [];
 }
 
 function findMicroformatsByType(array $mfs, $name, $flatten = true) {
