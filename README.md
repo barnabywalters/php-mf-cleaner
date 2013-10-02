@@ -64,6 +64,12 @@ $microformats = [
 	'items' => [$hEntry, $hCard]
 ];
 
+Mf2\isMicroformatCollection($microformats); // true
+
+Mf2\findMicroformatsByType($microformats, 'h-card'); // [$hCard]
+
+Mf2\findMicroformatsByProperty($microformats, 'published'); // [$hEntry]
+
 Mf2\findMicroformatsByCallable($microformats, function ($mf) {
 	return Mf2\hasProp($mf, 'published') and Mf2\hasProp($mf, 'author');
 }); // [$hEntry]
