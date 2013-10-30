@@ -2,7 +2,6 @@
 
 namespace BarnabyWalters\Mf2;
 
-use BarnabyWalters\Helpers\Helpers as H;
 use PHPUnit_Framework_TestCase;
 
 /**
@@ -220,7 +219,7 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 			$urls = $mf['properties']['url'];
 			
 			foreach ($urls as $url) {
-				if (H::sameHostname($url, 'http://waterpigs.co.uk'))
+				if (parse_url($url, PHP_URL_HOST) === parse_url('http://waterpigs.co.uk', PHP_URL_HOST))
 					return true;
 			}
 			
