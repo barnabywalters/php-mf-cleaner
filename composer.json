@@ -1,10 +1,7 @@
 {
     "name": "barnabywalters/mf-cleaner",
     "description": "Cleans up microformats2 array structures",
-    "require": {
-        "barnabywalters/helpers": "*",
-				"nesbot/carbon": "1.2"
-    },
+    "require": {},
     "require-dev": {
         "phpunit/phpunit": "*",
 				"php": ">=5.3"

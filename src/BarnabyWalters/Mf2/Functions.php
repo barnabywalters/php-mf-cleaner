@@ -2,12 +2,12 @@
 
 namespace BarnabyWalters\Mf2;
 
-use BarnabyWalters\Helpers\Helpers as H;
-use Carbon\Carbon;
+use DateTime;
 use Exception;
 
 function hasNumericKeys(array $arr) {
 	foreach ($arr as $key=>$val) if (is_numeric($key)) return true;
+	return false;
 }
 
 function isMicroformat($mf) {
@@ -18,52 +18,68 @@ function isMicroformatCollection($mf) {
 	return (is_array($mf) and isset($mf['items']) and is_array($mf['items']));
 }
 
+function isEmbeddedHtml($p) {
+	return is_array($p) and !hasNumericKeys($p) and isset($p['value']) and isset($p['html']);
+}
+
 function hasProp(array $mf, $propName) {
 	return !empty($mf['properties'][$propName]) and is_array($mf['properties'][$propName]);
 }
 
+/** shortcut for getPlaintext, use getPlaintext from now on */
 function getProp(array $mf, $propName, $fallback = null) {
-	if (!empty($mf['properties'][$propName]) and is_array($mf['properties'][$propName]))
-		return current($mf['properties'][$propName]);
+	return getPlaintext($mf, $propName, $fallback);
+}
+
+function toPlaintext($v) {
+	if (isMicroformat($v) or isEmbeddedHtml($v))
+		return $v['value'];
+	return $v;
+}
+
+function getPlaintext(array $mf, $propName, $fallback = null) {
+	if (!empty($mf['properties'][$propName]) and is_array($mf['properties'][$propName])) {
+		return toPlaintext(current($mf['properties'][$propName]));
+	}
 
 	return $fallback;
 }
 
+function getPlaintextArray(array $mf, $propName, $fallback = null) {
+	if (!empty($mf['properties'][$propName]) and is_array($mf['properties'][$propName]))
+		return array_map(__NAMESPACE__ . '\toPlaintext', $mf['properties'][$propName]);
+
+	return $fallback;
+}
+
+function toHtml($v) {
+	if (isEmbeddedHtml($v))
+		return $v['html'];
+	elseif (isMicroformat($v))
+		return htmlspecialchars($v['value']);
+	return htmlspecialchars($v);
+}
+
+function getHtml(array $mf, $propName, $fallback = null) {
+	if (!empty($mf['properties'][$propName]) and is_array($mf['properties'][$propName]))
+		return toHtml(current($mf['properties'][$propName]));
+
+	return $fallback;
+}
+
+/** @deprecated as not often used **/
 function getSummary(array $mf) {
 	if (hasProp($mf, 'summary'))
 		return getProp($mf, 'summary');
 
 	if (!empty($mf['properties']['content']))
-		return substr(strip_tags(getProp($mf, 'content')), 0, 19) . '…';
+		return substr(strip_tags(getPlaintext($mf, 'content')), 0, 19) . '…';
 }
 
-/**
- * Get Published Datetime
- * 
- * Given a mf2 structure, tries to approximate the datetime it was published. 
- * If $ensureValid is true, will return null if the found value can’t be parsed
- * by DateTime,
- * 
- * @param array $mf individual mf2 array structure
- * @param bool $ensureValid whether or not to check whether or not the potential return value can be parsed as a DateTime
- * @return string|null
- */
 function getPublished(array $mf, $ensureValid = false, $fallback = null) {
 	return getDateTimeProperty('published', $mf, $ensureValid, $fallback);
 }
 
-/**
- * Get Updated Datetime
- * 
- * Given a mf2 structure, tries to approximate the datetime it was 
- * last updated. 
- * If $ensureValid is true, will return null if the found value can’t be parsed
- * by DateTime.
- * 
- * @param array $mf individual mf2 array structure
- * @param bool $ensureValid whether or not to check whether or not the potential return value can be parsed as a DateTime
- * @return string|null
- */
 function getUpdated(array $mf, $ensureValid = false, $fallback = null) {
 	return getDateTimeProperty('updated', $mf, $ensureValid, $fallback);
 }
@@ -82,7 +98,7 @@ function getDateTimeProperty($name, array $mf, $ensureValid = false, $fallback =
 		return $return;
 	else {
 		try {
-			new Carbon($return);
+			new DateTime($return);
 			return $return;
 		} catch (Exception $e) {
 			return $fallback;
@@ -90,17 +106,24 @@ function getDateTimeProperty($name, array $mf, $ensureValid = false, $fallback =
 	}
 }
 
+function sameHostname($u1, $u2) {
+	return parse_url($u1, PHP_URL_HOST) === parse_url($u2, PHP_URL_HOST);
+}
+
 // TODO: maybe split some bits of this out into separate functions
+// TODO: this needs to be just part of an indiewebcamp.com/authorship algorithm, at the moment it tries to do too much
 function getAuthor(array $mf, array $context = null, $url = null) {
 	$entryAuthor = null;
 	
 	if (null === $url and hasProp($mf, 'url'))
 		$url = getProp($mf, 'url');
 	
-	if (hasProp($mf, 'author'))
-		$entryAuthor = getProp($mf, 'author');
-	elseif (hasProp($mf, 'reviewer'))
-		$entryAuthor = getProp($mf, 'reviewer');
+	if (hasProp($mf, 'author') and isMicroformat(current($mf['properties']['author'])))
+		$entryAuthor = current($mf['properties']['author']);
+	elseif (hasProp($mf, 'reviewer') and isMicroformat(current($mf['properties']['author'])))
+		$entryAuthor = current($mf['properties']['reviewer']);
+	elseif (hasProp($mf, 'author'))
+		$entryAuthor = getPlaintext($mf, 'author');
 	
 	// If we have no context that’s the best we can do
 	if (null === $context)
@@ -139,7 +162,7 @@ function getAuthor(array $mf, array $context = null, $url = null) {
 				return false;
 
 			foreach ($mf['properties']['url'] as $u) {
-				if (H::sameHostname($url, $u))
+				if (sameHostname($url, $u))
 					return true;
 			}
 		}, false);
@@ -178,7 +201,7 @@ function flattenMicroformats(array $mfs) {
 	elseif (isMicroformat($mfs))
 		$mfs = array($mfs);
 	
-	$items = array();
+	$items = [];
 	
 	foreach ($mfs as $mf) {
 		$items[] = $mf;

@@ -43,7 +43,7 @@ Mf2\isMicroformat([1, 2, 3, 4, 'key' => 'value']); // false
 
 Mf2\hasProp($hCard, 'name'); // true
 
-Mf2\getProp($hCard, 'name'); // 'Mr. Bran'
+Mf2\getPlaintext($hCard, 'name'); // 'Mr. Bran'
 
 $hEntry = [
 	'type' => ['h-entry'],

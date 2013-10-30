@@ -11,14 +11,14 @@ use PHPUnit_Framework_TestCase;
  * @author barnabywalters
  */
 class CleanerTest extends PHPUnit_Framework_TestCase {
-	protected function mf($name, array $properties) {
+	protected function mf($name, array $properties, $value='') {
 		if (is_array($name))
 			$type = $name;
 		else
 			$type = [$name];
 		
 		foreach ($properties as $name => $arg) {
-			if (is_array($arg))
+			if (is_array($arg) and !isMicroformat($arg) and !isEmbeddedHtml($arg))
 				$properties[$name] = $arg;
 			else
 				$properties[$name] = [$arg];
@@ -26,7 +26,8 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 		
 		return [
 			'type' => $type,
-			'properties' => $properties
+			'properties' => $properties,
+			'value' => $value
 		];
 	}
 	
@@ -236,6 +237,41 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 		$results = findMicroformatsByType($entry, 'h-card');
 		$this->assertEquals(1, count($results));
 	}	
+	
+	public function testIsEmbeddedHtml() {
+		$e = array('value' => '', 'html' => '');
+		$this->assertTrue(isEmbeddedHtml($e));
+		$this->assertFalse(isEmbeddedHtml(array()));
+	}
+	
+	public function testGetPlaintextProperty() {
+		$e = $this->mf('h-entry', [
+			'name' => 'text',
+			'content' => ['text' => 'content', 'html' => '<b>content</b>'],
+			'author' => [$this->mf('h-card', [], 'name')]
+		]);
+		$this->assertEquals('text', getPlaintext($e, 'name'));
+		$this->assertEquals('content', getPlaintext($e, 'content'));
+		$this->assertEquals('name', getPlaintext($e, 'author'));
+	}
+	
+	public function testGetPlaintextArray() {
+		$e = $this->mf('h-entry', [
+			'category' => ['text', 'more']
+		]);
+		$this->assertEquals(['text', 'more'], getPlaintextArray($e, 'category'));
+	}
+	
+	public function testGetHtmlProperty() {
+		$e = $this->mf('h-entry', [
+			'name' => ['"text"<>'],
+			'content' => ['value' => 'content', 'html' => '<b>content</b>'],
+			'author' => [$this->mf('h-card', [], '"name"<>')]
+		]);
+		$this->assertEquals('&quot;text&quot;&lt;&gt;', getHtml($e, 'name'));
+		$this->assertEquals('<b>content</b>', getHtml($e, 'content'));
+		$this->assertEquals('&quot;name&quot;&lt;&gt;', getHtml($e, 'author'));
+	}
 	
 	public function testExpandAuthorExpandsFromLargerHCardsInContext() {
 		$this->markTestSkipped();
