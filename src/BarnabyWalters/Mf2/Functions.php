@@ -231,7 +231,6 @@ function flattenMicroformats(array $mfs) {
 
 function findMicroformatsByType(array $mfs, $name, $flatten = true) {
 	return findMicroformatsByCallable($mfs, function ($mf) use ($name) {
-		if(!array_key_exists('type', $mf)) return false;
 		return in_array($name, $mf['type']);
 	}, $flatten);
 }
