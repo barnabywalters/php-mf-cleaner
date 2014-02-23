@@ -146,7 +146,7 @@ function getAuthor(array $mf, array $context = null, $url = null) {
 	
 	// Look for an "author" property on the top-level "h-feed" if present
 	$feed = findMicroformatsByType($flattenedMf, 'h-feed', false);
-	if ($feed) { #&& isMicroformat($feed) && !empty($feed['properties']['author'])) {
+	if ($feed) {
 		$feed = current($feed);
 		if($feed && isMicroformat($feed) && !empty($feed['properties']) && !empty($feed['properties']['author'])) {
 			return current($feed['properties']['author']);
