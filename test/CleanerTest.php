@@ -279,4 +279,27 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 	public function testMergeMicroformatsRecursivelyMerges() {
 		$this->markTestSkipped();
 	}
+
+	public function testGetAuthorDoesntReturnNonHCards() {
+		$mf = [
+			'items' => [[
+				'type' => ['h-entry'],
+				'properties' => [
+					'url' => ['http://example.com/post/100'],
+					'name' => ['Some Entry']
+				]
+			],
+			[
+				'type' => ['h-card'],
+				'properties' => [
+					'url' => ['http://example.com/'],
+					'name' => ['Mrs. Example']
+				]
+			]]
+		];
+
+		$author = getAuthor($mf['items'][0], $mf, 'http://example.com/post/100');
+
+		$this->assertContains('h-card', $author['type']);
+	}
 }

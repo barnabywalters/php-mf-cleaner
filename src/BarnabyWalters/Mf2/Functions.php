@@ -157,7 +157,7 @@ function getAuthor(array $mf, array $context = null, $url = null) {
 
 	// look for h-card with same hostname as $url if given
 	if (null !== $url) {
-		$sameHostnameHCards = findMicroformatsByCallable($flattenedMf, function ($mf) use ($url) {
+		$sameHostnameHCards = findMicroformatsByCallable($hCards, function ($mf) use ($url) {
 			if (!hasProp($mf, 'url'))
 				return false;
 
