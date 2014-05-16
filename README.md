@@ -93,3 +93,15 @@ code always expresses problems and intent much better than English, and gives me
 a way of measuring whether or not fixes have actually solved your problem. If you
 don’t know how to write tests, don’t worry :) Just include as much useful information
 in the issue as you can.
+
+## Changelog
+
+### v0.1.3 2014-05-16
+* Fixed issue causing getAuthor to return non-h-card microformats
+
+### v0.1.2
+
+### v0.1.1
+
+### v0.1.0
+* Initial version
