@@ -96,6 +96,10 @@ in the issue as you can.
 
 ## Changelog
 
+### v0.1.3 2014-10-06
+* Improved getAuthor() algorithm, made non-standard portions optional
+* Added getRepresentativeHCard() function implementing http://microformats.org/wiki/representative-h-card-parsing
+
 ### v0.1.3 2014-05-16
 * Fixed issue causing getAuthor to return non-h-card microformats
 
