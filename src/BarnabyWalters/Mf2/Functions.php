@@ -185,6 +185,79 @@ function getAuthor(array $mf, array $context = null, $url = null, $matchName = t
 		: $relAuthorHref;
 }
 
+function parseUrl($url) {
+	$r = parse_url($url);
+	$r['pathname'] = empty($r['path']) ? '/' : $r['path'];
+	return $r;
+}
+
+function urlsMatch($url1, $url2) {
+	$u1 = parseUrl($url1);
+	$u2 = parseUrl($url2);
+
+	foreach (array_merge(array_keys($u1), array_keys($u2)) as $component) {
+		if (!array_key_exists($component, $u1) or !array_key_exists($component, $u1)) {
+			return false;
+		}
+
+		if ($u1[$component] != $u2[$component]) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+/**
+ * Representative h-card
+ *
+ * Given the microformats on a page representing a person or organisation (h-card), find the single h-card which is
+ * representative of the page, or null if none is found.
+ *
+ * @see http://microformats.org/wiki/representative-h-card-parsing
+ *
+ * @param array $mfs The parsed microformats of a page to search for a representative h-card
+ * @param string $url The URL the microformats were fetched from
+ * @return array|null Either a single h-card array structure, or null if none was found
+ */
+function getRepresentativeHCard(array $mfs, $url) {
+	$hCardsMatchingUidUrlPageUrl = findMicroformatsByCallable($mfs, function ($hCard) use ($url) {
+		return hasProp($hCard, 'uid') and hasProp($hCard, 'url')
+			and urlsMatch(getPlaintext($hCard, 'uid'), $url)
+			and count(array_filter($hCard['properties']['url'], function ($u) use ($url) {
+				return urlsMatch($u, $url);
+			})) > 0;
+	});
+	if (!empty($hCardsMatchingUidUrlPageUrl)) return $hCardsMatchingUidUrlPageUrl[0];
+
+	if (!empty($mfs['rels']['me'])) {
+		$hCardsMatchingUrlRelMe = findMicroformatsByCallable($mfs, function ($hCard) use ($mfs) {
+			if (hasProp($hCard, 'url')) {
+				foreach ($mfs['rels']['me'] as $relUrl) {
+					foreach ($hCard['properties']['url'] as $url) {
+						if (urlsMatch($url, $relUrl)) {
+							return true;
+						}
+					}
+				}
+			}
+			return false;
+		});
+		if (!empty($hCardsMatchingUrlRelMe)) return $hCardsMatchingUrlRelMe[0];
+	}
+
+	$hCardsMatchingUrlPageUrl = findMicroformatsByCallable($mfs, function ($hCard) use ($url) {
+		return hasProp($hCard, 'url')
+			and count(array_filter($hCard['properties']['url'], function ($u) use ($url) {
+				return urlsMatch($u, $url);
+			})) > 0;
+	});
+	if (count($hCardsMatchingUrlPageUrl) === 1) return $hCardsMatchingUrlPageUrl[0];
+
+	// Otherwise, no representative h-card could be found.
+	return null;
+}
+
 function flattenMicroformatProperties(array $mf) {
 	$items = array();
 	

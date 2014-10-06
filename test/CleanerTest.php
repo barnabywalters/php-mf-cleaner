@@ -142,14 +142,14 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('Me', getProp($result, 'name'));
 	}
 	
-	public function testGetAuthorFallsBackToFirstHCard() {
+	public function testGetAuthorDoesntFallBackToFirstHCard() {
 		$cards = [$this->mf('h-card', ['name' => 'Bill']), $this->mf('h-card', ['name' => 'James'])];
 		$entry = $this->mf('h-entry', ['name' => 'Entry']);
 		$mfs = ['items' => $cards];
 		
 		$result = getAuthor($entry, $mfs);
 		
-		$this->assertEquals($cards[0], $result);
+		$this->assertEquals(null, $result);
 	}
 	
 	public function testGetAuthorFindsAuthorWithUrlOfPageRelAuthor() {
@@ -301,5 +301,86 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 		$author = getAuthor($mf['items'][0], $mf, 'http://example.com/post/100');
 
 		$this->assertContains('h-card', $author['type']);
+	}
+
+	public function testGetRepresentativeHCardFindsUidUrlPageUrlAllMatching() {
+		$url = 'https://example.com';
+		$mf = [
+			'items' => [[
+				'type' => ['h-entry'],
+				'properties' => [
+					'url' => ['https://example.com'],
+					'uid' => ['https://example.com'],
+					'name' => ['Correct h-card']
+				]
+			]]
+		];
+
+		$repHCard = getRepresentativeHCard($mf, $url);
+
+		$this->assertEquals('Correct h-card', getPlaintext($repHCard, 'name'));
+	}
+
+	public function testGetRepresentativeHCardFindsUrlRelMeMatching() {
+		$url = 'https://example.com';
+		$mf = [
+			'items' => [[
+					'type' => ['h-entry'],
+					'properties' => [
+							'url' => ['https://example.org'],
+							'name' => ['Correct h-card']
+					]
+			]],
+			'rels' => [
+				'me' => ['https://example.org']
+			]
+		];
+
+		$repHCard = getRepresentativeHCard($mf, $url);
+
+		$this->assertEquals('Correct h-card', getPlaintext($repHCard, 'name'));
+	}
+
+	public function testGetRepresentativeHCardFindsSingleUrlPageUrlMatching() {
+		$url = 'https://example.com';
+		$mf = [
+				'items' => [[
+						'type' => ['h-entry'],
+						'properties' => [
+								'url' => ['https://example.com'],
+								'name' => ['Correct h-card']
+						]
+				]],
+				'rels' => [
+						'me' => ['https://example.org']
+				]
+		];
+
+		$repHCard = getRepresentativeHCard($mf, $url);
+
+		$this->assertEquals('Correct h-card', getPlaintext($repHCard, 'name'));
+	}
+
+	public function testGetRepresentativeHCardIgnoresMultipleUrlPageUrlMatching() {
+		$url = 'https://example.com';
+		$mf = [
+				'items' => [[
+						'type' => ['h-entry'],
+						'properties' => [
+								'url' => ['https://example.com'],
+								'name' => ['Incorrect h-card']
+						]
+				], [
+						'type' => ['h-entry'],
+						'properties' => [
+								'url' => ['https://example.com'],
+								'name' => ['Another Incorrect h-card']
+						]
+				]]
+		];
+
+		$repHCard = getRepresentativeHCard($mf, $url);
+
+		$this->assertEquals(null, $repHCard);
 	}
 }
