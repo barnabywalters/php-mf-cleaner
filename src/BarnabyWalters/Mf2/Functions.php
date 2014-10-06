@@ -112,7 +112,7 @@ function sameHostname($u1, $u2) {
 
 // TODO: maybe split some bits of this out into separate functions
 // TODO: this needs to be just part of an indiewebcamp.com/authorship algorithm, at the moment it tries to do too much
-function getAuthor(array $mf, array $context = null, $url = null) {
+function getAuthor(array $mf, array $context = null, $url = null, $matchName = true, $matchHostname = true) {
 	$entryAuthor = null;
 	
 	if (null === $url and hasProp($mf, 'url'))
@@ -132,8 +132,8 @@ function getAuthor(array $mf, array $context = null, $url = null) {
 	// Whatever happens after this we’ll need these
 	$flattenedMf = flattenMicroformats($context);
 	$hCards = findMicroformatsByType($flattenedMf, 'h-card', false);
-	
-	if (is_string($entryAuthor)) {
+
+	if (is_string($entryAuthor) and $matchName) {
 		// look through all page h-cards for one with this name
 		$authorHCards = findMicroformatsByProperty($hCards, 'name', $entryAuthor, false);
 		
@@ -156,7 +156,7 @@ function getAuthor(array $mf, array $context = null, $url = null) {
 	}
 
 	// look for h-card with same hostname as $url if given
-	if (null !== $url) {
+	if (null !== $url and $matchHostname) {
 		$sameHostnameHCards = findMicroformatsByCallable($hCards, function ($mf) use ($url) {
 			if (!hasProp($mf, 'url'))
 				return false;
@@ -171,10 +171,10 @@ function getAuthor(array $mf, array $context = null, $url = null) {
 			return current($sameHostnameHCards);
 	}
 
-	// *sigh* return the first h-card or null
-	return empty($hCards)
+	// Without fetching, this is the best we can do. Return the found string value, or null.
+	return empty($relAuthorHref)
 		? null
-		: $hCards[0];
+		: $relAuthorHref;
 }
 
 function flattenMicroformatProperties(array $mf) {
