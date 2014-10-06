@@ -133,6 +133,14 @@ function getAuthor(array $mf, array $context = null, $url = null, $matchName = t
 	$flattenedMf = flattenMicroformats($context);
 	$hCards = findMicroformatsByType($flattenedMf, 'h-card', false);
 
+	if (is_string($entryAuthor)) {
+		// look through all page h-cards for one with this URL
+		$authorHCards = findMicroformatsByProperty($hCards, 'url', $entryAuthor, false);
+
+		if (!empty($authorHCards))
+			$entryAuthor = current($authorHCards);
+	}
+
 	if (is_string($entryAuthor) and $matchName) {
 		// look through all page h-cards for one with this name
 		$authorHCards = findMicroformatsByProperty($hCards, 'name', $entryAuthor, false);
