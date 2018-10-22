@@ -433,7 +433,7 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 			[
 				'type' => ['h-card'],
 				'properties' => [
-					'url' => ['https://example.com'],
+					'url' => ['https://example.com/user'],
 					'name' => ['Second h-card']
 				]
 			]]

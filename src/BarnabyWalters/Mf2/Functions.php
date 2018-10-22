@@ -256,12 +256,14 @@ function getRepresentativeHCard(array $mfs, $url) {
 		}
 	}
 
-	$hCardsMatchingUrlPageUrl = findMicroformatsByCallable($hCards, function ($hCard) use ($url) {
-		return hasProp($hCard, 'url')
-			and count(array_filter($hCard['properties']['url'], function ($u) use ($url) {
-				return urlsMatch($u, $url);
-			})) > 0;
-	});
+	if (count($hCards) == 1) {
+		$hCardsMatchingUrlPageUrl = findMicroformatsByCallable($hCards, function ($hCard) use ($url) {
+			return hasProp($hCard, 'url')
+				and count(array_filter($hCard['properties']['url'], function ($u) use ($url) {
+					return urlsMatch($u, $url);
+				})) > 0;
+		});
+	}
 
 	if (count($hCardsMatchingUrlPageUrl) === 1) {
 		return $hCardsMatchingUrlPageUrl[0];
