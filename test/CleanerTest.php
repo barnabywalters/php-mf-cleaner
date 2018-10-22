@@ -418,6 +418,32 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
+	 * Test no representative h-card when *multiple* h-card with `url` == page URL method
+	 */
+	public function testGetRepresentativeHCardMultipleHCardUrlSourceMethod() {
+		$url = 'https://example.com';
+		$mfs = [
+			'items' => [[
+				'type' => ['h-card'],
+				'properties' => [
+					'url' => ['https://example.com'],
+					'name' => ['First h-card']
+				]
+			],
+			[
+				'type' => ['h-card'],
+				'properties' => [
+					'url' => ['https://example.com'],
+					'name' => ['Second h-card']
+				]
+			]]
+		];
+
+		$repHCard = getRepresentativeHCard($mfs, $url);
+		$this->assertNull($repHCard);
+	}
+
+	/**
 	 * The getRepresentativeHCard() method used to return other h-* roots.
 	 * Modified this previous test to ensure the h-entry is not returned
 	 * even when its `url` == `uid` == page URL
@@ -491,14 +517,14 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 				'type' => ['h-entry'],
 				'properties' => [
 					'url' => ['https://example.com'],
-					'name' => ['Incorrect h-card']
+					'name' => ['Not an h-card']
 				]
 			],
 			[
 				'type' => ['h-entry'],
 				'properties' => [
 					'url' => ['https://example.com'],
-					'name' => ['Another Incorrect h-card']
+					'name' => ['Also not an h-card']
 				]
 			]]
 		];
