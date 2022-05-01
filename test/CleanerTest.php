@@ -337,6 +337,72 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
+	 * Test anyUrlsMatch() method comparing arrays of URLs
+	 */
+	public function testAnyUrlsMatchParameter1() {
+		$this->expectException('InvalidArgumentException');
+
+		$array = [
+			'https://example.com/',
+		];
+
+		anyUrlsMatch('string', $array);
+	}
+
+	public function testAnyUrlsMatchParameter2() {
+		$this->expectException('InvalidArgumentException');
+
+		$array = [
+			'https://example.com/',
+		];
+
+		anyUrlsMatch($array, 'string');
+	}
+
+	public function testAnyUrlsMatchNoMatch() {
+		$array1 = [
+			'https://example.com/',
+		];
+
+		$array2 = [
+			'https://example.com/profile',
+		];
+
+		$this->assertFalse(anyUrlsMatch($array1, $array2));
+		$this->assertFalse(anyUrlsMatch($array2, $array1));
+	}
+
+	public function testAnyUrlsMatch1() {
+		$array1 = [
+			'https://example.com/',
+		];
+
+		$array2 = [
+			'https://example.com/',
+		];
+
+		$this->assertTrue(anyUrlsMatch($array1, $array2));
+		$this->assertTrue(anyUrlsMatch($array2, $array1));
+	}
+
+	public function testAnyUrlsMatch2() {
+		$array1 = [
+			'https://example.com/profile1',
+			'https://example.com/profile2',
+			'https://example.com/profile3',
+		];
+
+		$array2 = [
+			'https://example.com/profile3',
+			'https://example.com/profile2',
+			'https://example.com/profile5',
+		];
+
+		$this->assertTrue(anyUrlsMatch($array1, $array2));
+		$this->assertTrue(anyUrlsMatch($array2, $array1));
+	}
+
+	/**
 	 * Test the h-card `url` == `uid` == page URL method
 	 * Use the first h-card that meets the criteria
 	 */

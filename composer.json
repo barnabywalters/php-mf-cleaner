@@ -1,23 +1,25 @@
 {
-    "name": "barnabywalters/mf-cleaner",
-    "description": "Cleans up microformats2 array structures",
-    "require": {},
-    "require-dev": {
-        "phpunit/phpunit": "*",
-				"php": ">=5.3"
-    },
-	  "autoload": {
-			"files": ["src/BarnabyWalters/Mf2/Functions.php"]
-		},
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Barnaby Walters",
-            "email": "barnaby@waterpigs.co.uk"
-        }
-    ],
-		"suggest": {
-			"mf2/mf2": "To parse microformats2 structures from (X)HTML"
-		},
-    "minimum-stability": "dev"
+  "name": "barnabywalters/mf-cleaner",
+  "description": "Cleans up microformats2 array structures",
+  "require": {},
+  "require-dev": {
+    "phpunit/phpunit": "*",
+    "php": ">=5.3"
+  },
+  "autoload": {
+    "files": [
+      "src/BarnabyWalters/Mf2/Functions.php"
+    ]
+  },
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Barnaby Walters",
+      "email": "barnaby@waterpigs.co.uk"
+    }
+  ],
+  "suggest": {
+    "mf2/mf2": "To parse microformats2 structures from (X)HTML"
+  },
+  "minimum-stability": "dev"
 }
