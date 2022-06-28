@@ -211,6 +211,26 @@ function urlsMatch($url1, $url2) {
 }
 
 /**
+ * Given two arrays of URLs, determine if any of them match
+ * @return bool
+ */
+function anyUrlsMatch($array1, $array2) {
+	if (!(is_array($array1) && is_array($array2))) {
+		throw new \InvalidArgumentException('anyUrlsMatch must be called with two arrays');
+	}
+
+	foreach ($array1 as $url1) {
+		foreach ($array2 as $url2) {
+			if (urlsMatch($url1, $url2)) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+/**
  * Representative h-card
  *
  * Given the microformats on a page representing a person or organisation (h-card), find the single h-card which is
@@ -225,48 +245,91 @@ function urlsMatch($url1, $url2) {
 function getRepresentativeHCard(array $mfs, $url) {
 	$hCards = findMicroformatsByType($mfs, 'h-card');
 
-	$hCardsMatchingUidUrlPageUrl = findMicroformatsByCallable($hCards, function ($hCard) use ($url) {
-		return hasProp($hCard, 'uid') and hasProp($hCard, 'url')
-			and urlsMatch(getPlaintext($hCard, 'uid'), $url)
-			and count(array_filter($hCard['properties']['url'], function ($u) use ($url) {
-				return urlsMatch($u, $url);
-			})) > 0;
+	/**
+	 * If the page contains an h-card with uid and url properties
+	 * both matching the page URL, the first such h-card is the
+	 * representative h-card
+	 */
+	$hCardMatches = findMicroformatsByCallable($hCards, function ($hCard) use ($url) {
+		$hCardUid = getPlaintext($hCard, 'uid');
+		$hCardUrls = getPlaintextArray($hCard, 'url');
+
+		# h-card must have uid and url properties
+		if (!($hCardUid && $hCardUrls)) {
+			return false;
+		}
+
+		# uid must match the page URL
+		if (!urlsMatch($hCardUid, $url)) {
+			return false;
+		}
+
+		# at least one h-card.url property must match the page URL
+		if (anyUrlsMatch($hCardUrls, [$url])) {
+			return true;
+		}
+
+		return false;
 	});
 
-	if (!empty($hCardsMatchingUidUrlPageUrl)) {
-		return $hCardsMatchingUidUrlPageUrl[0];
+	if (count($hCardMatches) > 0) {
+		return $hCardMatches[0];
 	}
 
+	/**
+	 * If no representative h-card was found, if the page contains an h-card
+	 * with a url property value which also has a rel=me relation
+	 * (i.e. matches a URL in parse_results.rels.me), the first such h-card
+	 * is the representative h-card
+	 */
 	if (!empty($mfs['rels']['me'])) {
-		$hCardsMatchingUrlRelMe = findMicroformatsByCallable($hCards, function ($hCard) use ($mfs) {
-			if (hasProp($hCard, 'url')) {
-				foreach ($mfs['rels']['me'] as $relUrl) {
-					foreach ($hCard['properties']['url'] as $url) {
-						if (urlsMatch($url, $relUrl)) {
-							return true;
-						}
-					}
-				}
+		$hCardMatches = findMicroformatsByCallable($hCards, function ($hCard) use ($mfs) {
+			$hCardUrls = getPlaintextArray($hCard, 'url');
+
+			# h-card must have url property
+			if (!$hCardUrls) {
+				return false;
 			}
+
+			# at least one h-card.url property must match a rel-me URL
+			if (anyUrlsMatch($hCardUrls, $mfs['rels']['me'])) {
+				return true;
+			}
+
 			return false;
 		});
 
-		if (!empty($hCardsMatchingUrlRelMe)) {
-			return $hCardsMatchingUrlRelMe[0];
+		if (count($hCardMatches) > 0) {
+			return $hCardMatches[0];
 		}
 	}
 
+	/**
+	 * If no representative h-card was found, if the page contains
+	 * one single h-card, and the h-card has a url property matching
+	 * the page URL, that h-card is the representative h-card
+	 */
+	$hCardMatches = [];
 	if (count($hCards) == 1) {
-		$hCardsMatchingUrlPageUrl = findMicroformatsByCallable($hCards, function ($hCard) use ($url) {
-			return hasProp($hCard, 'url')
-				and count(array_filter($hCard['properties']['url'], function ($u) use ($url) {
-					return urlsMatch($u, $url);
-				})) > 0;
-		});
-	}
+		$hCardMatches = findMicroformatsByCallable($hCards, function ($hCard) use ($url) {
+			$hCardUrls = getPlaintextArray($hCard, 'url');
 
-	if (count($hCardsMatchingUrlPageUrl) === 1) {
-		return $hCardsMatchingUrlPageUrl[0];
+			# h-card must have url property
+			if (!$hCardUrls) {
+				return false;
+			}
+
+			# at least one h-card.url property must match the page URL
+			if (anyUrlsMatch($hCardUrls, [$url])) {
+				return true;
+			}
+
+			return false;
+		});
+
+		if (count($hCardMatches) === 1) {
+			return $hCardMatches[0];
+		}
 	}
 
 	// Otherwise, no representative h-card could be found.
