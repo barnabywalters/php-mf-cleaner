@@ -261,10 +261,19 @@ function getAuthor(array $mf, array $context = null, $url = null, $matchName = t
 		if (!empty($authorHCards))
 			$entryAuthor = current($authorHCards);
 	}
-	
+
 	if (null !== $entryAuthor)
 		return $entryAuthor;
 	
+	// Look for an "author" property on the top-level "h-feed" if present
+	$feed = findMicroformatsByType($flattenedMf, 'h-feed', false);
+	if ($feed) {
+		$feed = current($feed);
+		if($feed && isMicroformat($feed) && !empty($feed['properties']) && !empty($feed['properties']['author'])) {
+			return current($feed['properties']['author']);
+		}
+	}
+
 	// look for page-wide rel-author, h-card with that
 	if (!empty($context['rels']) and !empty($context['rels']['author'])) {
 		// Grab first href with rel=author
