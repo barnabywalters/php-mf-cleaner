@@ -36,7 +36,7 @@ use BarnabyWalters\Mf2;
 $hCard = [
 	'type' => ['h-card'],
 	'properties' => [
-		'name' => ['Mr. Bran'],
+		'name' => ['Example McExampleface'],
 		'photo' => [['value' => 'https://example.org/photo.png', 'alt' => 'a photo of an example']],
 		'logo' => ['https://example.org/logo.png']
 	]
@@ -47,7 +47,7 @@ Mf2\isMicroformat([1, 2, 3, 4, 'key' => 'value']); // false
 
 Mf2\hasProp($hCard, 'name'); // true
 
-Mf2\getPlaintext($hCard, 'name'); // 'Mr. Bran'
+Mf2\getPlaintext($hCard, 'name'); // 'Example McExampleface'
 
 Mf2\getPlaintext($hCard, 'photo'); // 'https://example.org/photo.png'
 Mf2\getImgAlt($hCard, 'photo'); // ['value' => 'https://example.org/photo.png', 'alt' => 'a photo of an example']
@@ -131,11 +131,15 @@ Other changes:
 * Started signing release tags to enable verification
 * Updated readme usage
 
-### v0.1.4 2014-10-06
+### v0.1.4
+2014-10-06
+
 * Improved getAuthor() algorithm, made non-standard portions optional
 * Added getRepresentativeHCard() function implementing http://microformats.org/wiki/representative-h-card-parsing
 
-### v0.1.3 2014-05-16
+### v0.1.3
+2014-05-16
+
 * Fixed issue causing getAuthor to return non-h-card microformats
 
 ### v0.1.2
