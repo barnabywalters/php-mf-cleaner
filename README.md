@@ -126,7 +126,8 @@ Other changes:
 * Initial implementation of `removeFalsePositiveRootMicroformats()`, to restructure mf2 data into something usable when known non-mf2 h-* classnames are used
 * Added some more tests to improve coverage
 * Set up GH Action CI to test against PHP 7.3, 7.4, 8.0 and 8.1
-* Set up /docs with generated documentation and public code coverage info
+* Set up /docs with generated documentation (thanks HongPong!) and public code coverage info
+* getAuthor additionally looks for an h-feed author property (thanks aaronpk!)
 * Moved deeply nested Functions file to a shallower location for convenience
 * Started signing release tags to enable verification
 * Updated readme usage
