@@ -17,7 +17,7 @@ Versioned releases are GPG signed so you can verify that the code hasn’t been 
 
     gpg --recv-keys 1C00430B19C6B426922FE534BEF8CE58118AD524
     cd vendor/barnabywalters/mf-cleaner
-    git tag -v v0.2 # Replace with the version you have installed
+    git tag -v v0.2.0 # Replace with the version you have installed
 
 ## Usage
 
@@ -109,7 +109,7 @@ If discussions lead to you wanting to submit a pull request, following this proc
 
 ## Changelog
 
-### v0.2
+### v0.2.0
 
 2022-11-15
 
