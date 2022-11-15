@@ -263,25 +263,40 @@ class CleanerTest extends TestCase {
 		$this->assertTrue(isEmbeddedHtml($e));
 		$this->assertFalse(isEmbeddedHtml(array()));
 	}
+
+	public function testIsImgAlt() {
+		$this->assertFalse(isImgAlt(false));
+		$this->assertFalse(isImgAlt('string'));
+		$this->assertFalse(isImgAlt(['value' => 'no alt key tho']));
+		$this->assertFalse(isImgAlt(['alt' => 'no value key tho']));
+		$this->assertFalse(isImgAlt(['value' => 'yup', 'alt' => 'yup', 0 => 'got numeric keys tho']));
+		$this->assertTrue(isImgAlt(['value' => 'yup', 'alt' => 'yup']));
+	}
 	
 	public function testGetPlaintextProperty() {
 		$e = $this->mf('h-entry', [
 			'name' => 'text',
 			'content' => ['text' => 'content', 'html' => '<b>content</b>'],
-			'author' => [$this->mf('h-card', [], 'name')]
+			'author' => [$this->mf('h-card', [], 'name')],
+			'photo' => [['value' => 'value', 'alt' => 'alt']]
 		]);
 		$this->assertEquals('text', getPlaintext($e, 'name'));
 		$this->assertEquals('content', getPlaintext($e, 'content'));
 		$this->assertEquals('name', getPlaintext($e, 'author'));
 		$this->assertNull(getPlaintext($e, 'badprop'));
 		$this->assertEquals('fallback', getPlaintext($e, 'badprop', 'fallback'));
+		$this->assertEquals('value', getPlaintext($e, 'photo'));
 		// Deprecated, tested here to prevent regression and for coverage
 		$this->assertEquals('text', getProp($e, 'name'));
 	}
 	
 	public function testGetPlaintextArray() {
 		$e = $this->mf('h-entry', [
-			'category' => ['text', 'more']
+			'category' => ['text', 'more'],
+			'photo' => [
+				'value1',
+				['value' => 'value2', 'alt' => 'alt']
+			]
 		]);
 		$this->assertEquals(['text', 'more'], getPlaintextArray($e, 'category'));
 		$this->assertNull(getPlaintextArray($e, 'badprop'));
@@ -292,13 +307,27 @@ class CleanerTest extends TestCase {
 		$e = $this->mf('h-entry', [
 			'name' => ['"text"<>'],
 			'content' => ['value' => 'content', 'html' => '<b>content</b>'],
-			'author' => [$this->mf('h-card', [], '"name"<>')]
+			'author' => [$this->mf('h-card', [], '"name"<>')],
+			'photo' => [['value' => 'value', 'alt' => 'alt']]
 		]);
 		$this->assertEquals('&quot;text&quot;&lt;&gt;', getHtml($e, 'name'));
 		$this->assertEquals('<b>content</b>', getHtml($e, 'content'));
 		$this->assertEquals('&quot;name&quot;&lt;&gt;', getHtml($e, 'author'));
 		$this->assertNull(getHtml($e, 'badprop'));
 		$this->assertEquals('fallback', getHtml($e, 'badprop', 'fallback'));
+	}
+
+	public function testGetImgAlt() {
+		$e = $this->mf('h-entry', [
+			'photo' => ['pval'],
+			'featured' => [['value' => 'fval', 'alt' => 'falt']],
+			'html' => [['value' => 'plain', 'html' => 'html']],
+			'embedded' => [$this->mf('h-card', [], 'epval')]
+		]);
+		$this->assertEquals(['value' => 'pval', 'alt' => ''], getImgAlt($e, 'photo'));
+		$this->assertEquals(['value' => 'fval', 'alt' => 'falt'], getImgAlt($e, 'featured'));
+		$this->assertEquals(['value' => 'plain', 'alt' => ''], getImgAlt($e, 'html'));
+		$this->assertEquals(['value' => 'epval', 'alt' => ''], getImgAlt($e, 'embedded'));
 	}
 	
 	public function testExpandAuthorExpandsFromLargerHCardsInContext() {

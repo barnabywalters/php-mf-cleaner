@@ -1,25 +1,27 @@
 # php-mf-cleaner
 
-Lots of little helpers for processing canonical [microformats2](http://microformats.org/wiki/microformats2) array structures. Counterpart to indieweb/php-mf2
+[![Latest Stable Version](http://poser.pugx.org/barnabywalters/mf-cleaner/v)](https://packagist.org/packages/barnabywalters/mf-cleaner) <a href="https://github.com/barnabywalters/mf-cleaner/actions/workflows/php.yml"><img src="https://github.com/barnabywalters/php-mf-cleaner/actions/workflows/php.yml/badge.svg?branch=main" alt="" /></a> [![License](http://poser.pugx.org/barnabywalters/mf-cleaner/license)](https://packagist.org/packages/barnabywalters/mf-cleaner) [![Total Downloads](http://poser.pugx.org/barnabywalters/mf-cleaner/downloads)](https://packagist.org/packages/barnabywalters/mf-cleaner) 
+
+Lots of little helpers for processing canonical [microformats2](http://microformats.org/wiki/microformats2) array structures. Counterpart to [indieweb/php-mf2](https://github.com/indieweb/php-mf2).
 
 ## Installation
 
-Install using [Composer](https://getcomposer.org) by adding `barnabywalters/mf-cleaner` to your composer.json:
+barnabywalters/mf-cleaner is currently tested against and compatible with PHP 7.3, 7.4, 8.0 and 8.1.
 
-```json
-{
-	"require": {
-		"barnabywalters/mf-cleaner": "0.*"
-	}
-}
-```
+Install barnabywalters/mf-cleaner using [composer](https://getcomposer.org/):
 
-Then require `vendor/autoload.php` as usual, and you’re ready to go.
+    composer.phar require barnabywalters/mf-cleaner
+    composer.phar install (or composer.phar update)
+
+Versioned releases are GPG signed so you can verify that the code hasn’t been tampered with.
+
+    gpg --recv-keys 1C00430B19C6B426922FE534BEF8CE58118AD524
+    cd vendor/barnabywalters/mf-cleaner
+    git tag -v v0.2 # Replace with the version you have installed
 
 ## Usage
 
-Should be pretty much self-documenting, you can always look in the tests to see 
-exactly what a function is supposed to do. Here are some common examples:
+Most of the functions are self explanatory, and all come with summaries in docblocks if something is unclear. This example shows the most common usage:
 
 ```php
 <?php
@@ -34,7 +36,9 @@ use BarnabyWalters\Mf2;
 $hCard = [
 	'type' => ['h-card'],
 	'properties' => [
-		'name' => ['Mr. Bran']
+		'name' => ['Mr. Bran'],
+		'photo' => [['value' => 'https://example.org/photo.png', 'alt' => 'a photo of an example']],
+		'logo' => ['https://example.org/logo.png']
 	]
 ];
 
@@ -45,20 +49,30 @@ Mf2\hasProp($hCard, 'name'); // true
 
 Mf2\getPlaintext($hCard, 'name'); // 'Mr. Bran'
 
+Mf2\getPlaintext($hCard, 'photo'); // 'https://example.org/photo.png'
+Mf2\getImgAlt($hCard, 'photo'); // ['value' => 'https://example.org/photo.png', 'alt' => 'a photo of an example']
+
+Mf2\getImgAlt($hCard, 'logo'); // ['value' => 'https://example.org/logo.png', 'alt' => '']
+
 $hEntry = [
 	'type' => ['h-entry'],
 	'properties' => [
 		'published' => ['2013-06-12 12:00:00'],
-		'author' => $hCard
+		'author' => [$hCard],
+		'summary' => ['A plaintext summary with <>&" HTML special characters :o'],
+		'content' => [['value' => 'Hi!', 'html' => '<p><em>Hi!</em></p>']]
 	]
 ];
 
 Mf2\flattenMicroformats($hEntry); // returns array with $hEntry followed by $hCard
-Mf2\getAuthor($hEntry); // returns $hCard, can do all sorts of handy searching
+Mf2\getAuthor($hEntry); // returns $hCard. Is an incomplete but still useful implementation of https://indieweb.org/authorship-spec which doesn’t follow links.
 
 // Get the published datetime, fall back to updated if that’s present check that
 // it can be parsed by \DateTime, return null if it can’t be found or is invalid
 Mf2\getPublished($hEntry, true, null); // '2013-06-12 12:00:00'
+
+Mf2\getHtml($hEntry, 'content'); // '<p><em>Hi!</em></p>'
+Mf2\getHtml($hEntry, 'summary'); // "A plaintext summary with &lt;&gt;&amp;&quot; HTML special characters :o"
 
 $microformats = [
 	'items' => [$hEntry, $hCard]
@@ -78,23 +92,44 @@ Mf2\findMicroformatsByCallable($microformats, function ($mf) {
 
 ## Contributing
 
-Pull requests very welcome, please try to maintain stylistic, structural
-and naming consistency with the existing codebase, and don’t be too upset if I 
-make naming changes :)
+If you have any questions about using this library, join the [indieweb dev chatroom](https://chat.indieweb.org/dev/), and ping `barnaby` or ask one of the other friendly people there.
 
-Please add tests which cover changes you plan to make or have made. I use PHPUnit,
-which is the de-facto standard for modern PHP development.
+If you find a bug or problem with the library, or want to suggest a feature, please [create an issue](https://github.com/barnabywalters/php-mf-cleaner/issues/new).
 
-At the very least, run the test suite before and after making your changes to 
-make sure you haven’t broken anything.
+If discussions lead to you wanting to submit a pull request, following this process, while not required, will increase the chances of it quickly being accepted:
 
-Issues/bug reports welcome. If you know how to write tests then please do so as
-code always expresses problems and intent much better than English, and gives me
-a way of measuring whether or not fixes have actually solved your problem. If you
-don’t know how to write tests, don’t worry :) Just include as much useful information
-in the issue as you can.
+* Fork this repo to your own github account, and clone it to your development computer.
+* Run `./run_coverage.sh` and ensure that all tests pass — you’ll need XDebug for code coverage data.
+* If applicable, write failing regression tests e.g. for a bug you’re fixing.
+* Make your changes.
+* Run `./run_coverage.sh` and `open docs/coverage/index.html`. Make sure that the changes you made are covered by tests. taproot/indieauth had nearly 100% test coverage from version 0.1.0, and that number should never go down!
+* Run `./vendor/bin/psalm` and and fix any warnings it brings up.
+* Install and run `./phpDocumentor.phar` to regenerate the documentation if applicable.
+* Push your changes and submit the PR.
 
 ## Changelog
+
+### v0.2
+
+2022-11-15
+
+> Awoken from their eight year long slumber, the maintainer lurched into activity to release a long-overdue update…
+
+**Breaking Changes:**
+
+* Raised minimum PHP version to 7.3
+* Renamed main branch from `master` to `main`. If you were requiring `dev-master` you will need to rename it to `dev-main`
+
+Other changes:
+
+* Added support for img-alt structures. `getPlaintext()` and `toPlaintext()` correctly return the `value` value. Added `isImgAlt()`, `toImgAlt()` and `getImgAlt()`, all of which do exactly what you’d expect them to.
+* Initial implementation of `removeFalsePositiveRootMicroformats()`, to restructure mf2 data into something usable when known non-mf2 h-* classnames are used
+* Added some more tests to improve coverage
+* Set up GH Action CI to test against PHP 7.3, 7.4, 8.0 and 8.1
+* Set up /docs with generated documentation and public code coverage info
+* Moved deeply nested Functions file to a shallower location for convenience
+* Started signing release tags to enable verification
+* Updated readme usage
 
 ### v0.1.4 2014-10-06
 * Improved getAuthor() algorithm, made non-standard portions optional

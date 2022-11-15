@@ -47,6 +47,15 @@ function isEmbeddedHtml($p): bool {
 }
 
 /**
+ * Checks to see if the passed value is an img-alt structure.
+ * @param $p
+ * @return bool
+ */
+function isImgAlt($p): bool {
+	return is_array($p) and !hasNumericKeys($p) and isset($p['value']) and isset($p['alt']);
+}
+
+/**
  * Verifies if property named $propName is in array $mf.
  * @param array $mf
  * @param $propName
@@ -69,12 +78,12 @@ function getProp(array $mf, $propName, $fallback = null) {
 }
 
 /**
- * If $v is a microformat or embedded html, return $v['value']. Else return v.
+ * If $v is a microformat, embedded html, or img-alt structure, return $v['value']. Else return v.
  * @param $v
  * @return mixed
  */
 function toPlaintext($v) {
-	if (isMicroformat($v) or isEmbeddedHtml($v))
+	if (isMicroformat($v) or isEmbeddedHtml($v) or isImgAlt($v))
 		return $v['value'];
 	return $v;
 }
@@ -132,6 +141,41 @@ function toHtml($v) {
 function getHtml(array $mf, $propName, $fallback = null) {
 	if (!empty($mf['properties'][$propName]) and is_array($mf['properties'][$propName]))
 		return toHtml(current($mf['properties'][$propName]));
+
+	return $fallback;
+}
+
+/**
+ * To img-alt
+ * 
+ * Converts a value to an img-alt `{'value': '', 'alt': ''}` structure. Passes through existing
+ * img-alt structures unchanged. For anything else, converts it to its plaintext representation,
+ * put that in the `value` key, and adds an empty `alt` key.
+ * 
+ * @param $v
+ * @return array
+ */
+function toImgAlt($v) {
+	if (isImgAlt($v))
+		return $v;
+	
+	return ['value' => toPlaintext($v), 'alt' => ''];
+}
+
+/**
+ * Get img-alt
+ * 
+ * If `$propName` exists on `$mf`, return an img-alt representation of it (via `toImgAlt`). If the
+ * property does not exist, return `$fallback` (default null)
+ * 
+ * @param array $mf
+ * @param string $propName
+ * @param mixed $fallback
+ * @return array|mixed
+ */
+function getImgAlt(array $mf, string $propName, $fallback = null) {
+	if (isMicroformat($mf) and !empty($mf['properties'][$propName]) and is_array($mf['properties'][$propName]))
+		return toImgAlt(current($mf['properties'][$propName]));
 
 	return $fallback;
 }
