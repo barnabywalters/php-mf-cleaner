@@ -1,14 +1,16 @@
 {
   "name": "barnabywalters/mf-cleaner",
   "description": "Cleans up microformats2 array structures",
-  "require": {},
+  "require": {
+    "php": ">=7.3"
+  },
   "require-dev": {
-    "phpunit/phpunit": "*",
-    "php": ">=5.3"
+    "phpunit/phpunit": "~9",
+    "vimeo/psalm": "~4"
   },
   "autoload": {
     "files": [
-      "src/BarnabyWalters/Mf2/Functions.php"
+      "src/functions.php"
     ]
   },
   "license": "MIT",

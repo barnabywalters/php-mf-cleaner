@@ -2,14 +2,15 @@
 
 namespace BarnabyWalters\Mf2;
 
-use PHPUnit_Framework_TestCase;
+use InvalidArgumentException;
+use PHPUnit\Framework\TestCase;
 
 /**
  * CleanerTest
  *
  * @author barnabywalters
  */
-class CleanerTest extends PHPUnit_Framework_TestCase {
+class CleanerTest extends TestCase {
 	protected function mf($name, array $properties, $value='') {
 		if (is_array($name))
 			$type = $name;
@@ -87,19 +88,20 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 	public function testGetPublishedPassesIfPublishedPresent() {
 		$mf = $this->mf('h-entry', ['published' => '2013-12-06']);
 		$result = getPublished($mf);
-		$this->assertEquals(getProp($mf, 'published'), $result);
+		$this->assertEquals(getPlaintext($mf, 'published'), $result);
 	}
 	
 	public function testGetPublishedFallsBackToUpdated() {
 		$mf = $this->mf('h-entry', ['updated' => '2013-12-06']);
 		$result = getPublished($mf);
-		$this->assertEquals(getProp($mf, 'updated'), $result);
+		$this->assertEquals(getPlaintext($mf, 'updated'), $result);
 	}
 	
 	public function testGetPublishedReturnsNullIfValidDatetimeRequested() {
 		$mf = $this->mf('h-entry', ['published' => 'werty']);
-		$result = getPublished($mf, true);
-		$this->assertNull($result);
+		$this->assertNull(getPublished($mf, true));
+		$mf = $this->mf('h-entry', ['published' => '2022-01-01 10:00:00']);
+		$this->assertEquals('2022-01-01 10:00:00', getPublished($mf, true));
 	}
 	
 	public function testGetPublishedReturnsNullIfNoPotentialValueFound() {
@@ -112,11 +114,15 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 		$mf = $this->mf('h-entry', []);
 		$this->assertEquals('fallback', getPublished($mf, true, 'fallback'));
 	}
+
+	public function testGetUpdated() {
+		$mf = $this->mf('h-entry', ['updated' => '2013-12-06']);
+		$this->assertEquals('2013-12-06', getUpdated($mf));
+	}
 	
 	public function testGetAuthorPassesIfAuthorPresent() {
 		$mf = $this->mf('h-entry', ['author' => [$this->mf('h-card', ['name' => 'Me'])]]);
-		$result = getAuthor($mf);
-		$this->assertEquals('Me', getProp($result, 'name'));
+		$this->assertEquals('Me', getPlaintext(getAuthor($mf), 'name'));
 	}
 	
 	public function testGetAuthorFindsSeparateHCardWithSameName() {
@@ -129,7 +135,7 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 		
 		$result = getAuthor($entry, $mfs);
 		
-		$this->assertEquals('http://waterpigs.co.uk', getProp($result, 'url'));
+		$this->assertEquals('http://waterpigs.co.uk', getPlaintext($result, 'url'));
 	}
 	
 	public function testGetAuthorFindsSeparateHCardWithSameDomain() {
@@ -139,7 +145,15 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 		
 		$result = getAuthor($entry, $mfs, 'http://waterpigs.co.uk/notes/1234');
 		
-		$this->assertEquals('Me', getProp($result, 'name'));
+		$this->assertEquals('Me', getPlaintext($result, 'name'));
+	}
+
+	public function testGetAuthorDerivesMissingUrlFromMf() {
+		$card = $this->mf('h-card', ['name' => 'Me', 'url' => 'https://waterpigs.co.uk']);
+		$entry = $this->mf('h-entry', ['name' => 'The Entry', 'url' => 'https://waterpigs.co.uk/posts/1']);
+		$mfs = ['items' => [$entry, $card]];
+
+		$this->assertEquals('Me', getPlaintext(getAuthor($entry, $mfs), 'name'));
 	}
 	
 	public function testGetAuthorDoesntFallBackToFirstHCard() {
@@ -178,7 +192,7 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 		];
 		
 		$result = findMicroformatsByType($mfs, 'h-card');
-		$this->assertEquals('me', getProp($result[0], 'name'));
+		$this->assertEquals('me', getPlaintext($result[0], 'name'));
 	}
 	
 	public function testFlattenMicroformatsReturnsFlatArrayOfMicroformats() {
@@ -227,6 +241,13 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 		});
 		
 		$this->assertEquals(1, count($results));
+
+		try {
+			findMicroformatsByCallable($mfs, 'not a callable :P');
+			$this->fail('No InvalidArgumentException thrown when a non-callable was passed to findMicroformatsByCallable');
+		} catch (InvalidArgumentException $e) {
+			// Pass!
+		}
 	}
 	
 	public function testFindMicroformatsSearchesSingleMicroformatStructure() {
@@ -252,6 +273,10 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('text', getPlaintext($e, 'name'));
 		$this->assertEquals('content', getPlaintext($e, 'content'));
 		$this->assertEquals('name', getPlaintext($e, 'author'));
+		$this->assertNull(getPlaintext($e, 'badprop'));
+		$this->assertEquals('fallback', getPlaintext($e, 'badprop', 'fallback'));
+		// Deprecated, tested here to prevent regression and for coverage
+		$this->assertEquals('text', getProp($e, 'name'));
 	}
 	
 	public function testGetPlaintextArray() {
@@ -259,6 +284,8 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 			'category' => ['text', 'more']
 		]);
 		$this->assertEquals(['text', 'more'], getPlaintextArray($e, 'category'));
+		$this->assertNull(getPlaintextArray($e, 'badprop'));
+		$this->assertEquals('fallback', getPlaintextArray($e, 'badprop', 'fallback'));
 	}
 	
 	public function testGetHtmlProperty() {
@@ -270,6 +297,8 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('&quot;text&quot;&lt;&gt;', getHtml($e, 'name'));
 		$this->assertEquals('<b>content</b>', getHtml($e, 'content'));
 		$this->assertEquals('&quot;name&quot;&lt;&gt;', getHtml($e, 'author'));
+		$this->assertNull(getHtml($e, 'badprop'));
+		$this->assertEquals('fallback', getHtml($e, 'badprop', 'fallback'));
 	}
 	
 	public function testExpandAuthorExpandsFromLargerHCardsInContext() {
@@ -597,5 +626,29 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
 
 		$repHCard = getRepresentativeHCard($mfs, $url);
 		$this->assertNull($repHCard);
+	}
+
+	public function testRemoveFalsePositiveRootMicroformats() {
+		// Based on https://www.lifelog.be/ninety-days-in-a-new-country as of 2022-11-15
+		$test = [
+			'items' => [
+				[
+					'type' => ['h-full'],
+					'properties' => [],
+					'children' => [
+						['type' => ['h-auto'], 'properties' => ['name' => ['']]],
+						['type' => ['h-entry'], 'properties' => ['name' => ['Ninety days in a new country"']]]
+					]
+				]
+			]
+		];
+
+		$expected = [
+			'items' => [
+				['type' => ['h-entry'], 'properties' => ['name' => ['Ninety days in a new country"']]]
+			]
+		];
+
+		$this->assertEquals($expected, removeFalsePositiveRootMicroformats($test));
 	}
 }

@@ -1,29 +1,7 @@
-<phpunit backupGlobals="true"
-         bootstrap="test/bootstrap.php"
-         backupStaticAttributes="false"
-         cacheTokens="false"
-         colors="false"
-         convertErrorsToExceptions="true"
-         convertNoticesToExceptions="true"
-         convertWarningsToExceptions="true"
-         forceCoversAnnotation="false"
-         mapTestClassNameToCoveredClassName="false"
-         printerClass="PHPUnit_TextUI_ResultPrinter"
-         processIsolation="false"
-         stopOnError="false"
-         stopOnFailure="false"
-         stopOnIncomplete="false"
-         stopOnSkipped="false"
-         strict="false"
-         verbose="false">
-    <testsuites>
-        <testsuite name="Test Suite">
-            <directory suffix="Test.php">test/</directory>
-        </testsuite>
-    </testsuites>
-    <logging>
-        <log type="coverage-html" target="tmp/report" charset="UTF-8"
-                     highlight="true"/>
-        <log type="testdox-html" target="tmp/index.html"/>
-    </logging>
+<phpunit>
+	<testsuites>
+		<testsuite name="tests">
+			<directory>tests</directory>
+		</testsuite>
+	</testsuites>
 </phpunit>

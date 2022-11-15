@@ -1,6 +1,6 @@
 <?php
 /**
- * @file Functions.php provides utility functions for processing and validating microformats
+ * @file functions.php provides utility functions for processing and validating microformats
  * $mf is generally expected to be an array although some functions can verify this, as well.
  * @link microformats.org/wiki/microformats2
  */
@@ -14,8 +14,8 @@ use Exception;
  * @param array $arr
  * @return bool
  */
-function hasNumericKeys(array $arr) {
-	foreach ($arr as $key=>$val) if (is_numeric($key)) return true;
+function hasNumericKeys(array $arr): bool {
+	foreach ($arr as $key => $val) if (is_numeric($key)) return true;
 	return false;
 }
 
@@ -24,7 +24,7 @@ function hasNumericKeys(array $arr) {
  * @param $mf
  * @return bool
  */
-function isMicroformat($mf) {
+function isMicroformat($mf): bool {
 	return (is_array($mf) and !hasNumericKeys($mf) and !empty($mf['type']) and isset($mf['properties']));
 }
 
@@ -33,7 +33,7 @@ function isMicroformat($mf) {
  * @param $mf
  * @return bool
  */
-function isMicroformatCollection($mf) {
+function isMicroformatCollection($mf): bool {
 	return (is_array($mf) and isset($mf['items']) and is_array($mf['items']));
 }
 
@@ -42,7 +42,7 @@ function isMicroformatCollection($mf) {
  * @param $p
  * @return bool
  */
-function isEmbeddedHtml($p) {
+function isEmbeddedHtml($p): bool {
 	return is_array($p) and !hasNumericKeys($p) and isset($p['value']) and isset($p['html']);
 }
 
@@ -52,7 +52,7 @@ function isEmbeddedHtml($p) {
  * @param $propName
  * @return bool
  */
-function hasProp(array $mf, $propName) {
+function hasProp(array $mf, $propName): bool {
 	return !empty($mf['properties'][$propName]) and is_array($mf['properties'][$propName]);
 }
 
@@ -99,8 +99,8 @@ function getPlaintext(array $mf, $propName, $fallback = null) {
  * Converts $propName in $mf into array_map plaintext, or $fallback if not valid.
  * @param array $mf
  * @param $propName
- * @param null|string $fallback
- * @return null
+ * @param mixed $fallback default null
+ * @return mixed
  */
 function getPlaintextArray(array $mf, $propName, $fallback = null) {
 	if (!empty($mf['properties'][$propName]) and is_array($mf['properties'][$propName]))
@@ -144,10 +144,10 @@ function getHtml(array $mf, $propName, $fallback = null) {
  */
 function getSummary(array $mf) {
 	if (hasProp($mf, 'summary'))
-		return getProp($mf, 'summary');
+		return getPlaintext($mf, 'summary');
 
 	if (!empty($mf['properties']['content']))
-		return substr(strip_tags(getPlaintext($mf, 'content')), 0, 19) . '…';
+		return substr(strip_tags(getPlaintext($mf, 'content') ?? ''), 0, 19) . '…';
 }
 
 /**
@@ -184,9 +184,9 @@ function getDateTimeProperty($name, array $mf, $ensureValid = false, $fallback =
 	$compliment = 'published' === $name ? 'updated' : 'published';
 
 	if (hasProp($mf, $name))
-		$return = getProp($mf, $name);
+		$return = getPlaintext($mf, $name);
 	elseif (hasProp($mf, $compliment))
-		$return = getProp($mf, $compliment);
+		$return = getPlaintext($mf, $compliment);
 	else
 		return $fallback;
 
@@ -194,7 +194,7 @@ function getDateTimeProperty($name, array $mf, $ensureValid = false, $fallback =
 		return $return;
 	else {
 		try {
-			new DateTime($return);
+			new DateTime($return ?? '');
 			return $return;
 		} catch (Exception $e) {
 			return $fallback;
@@ -229,7 +229,7 @@ function getAuthor(array $mf, array $context = null, $url = null, $matchName = t
 	$entryAuthor = null;
 	
 	if (null === $url and hasProp($mf, 'url'))
-		$url = getProp($mf, 'url');
+		$url = getPlaintext($mf, 'url');
 	
 	if (hasProp($mf, 'author') and isMicroformat(current($mf['properties']['author'])))
 		$entryAuthor = current($mf['properties']['author']);
@@ -525,7 +525,11 @@ function flattenMicroformats(array $mfs) {
 }
 
 /**
- *
+ * Find Microformats By Type
+ * 
+ * Traverses a mf2 tree and returns all microformats objects whose type matches the one
+ * given. 
+ * 
  * @param array $mfs
  * @param $name
  * @param bool $flatten
@@ -538,7 +542,7 @@ function findMicroformatsByType(array $mfs, $name, $flatten = true) {
 }
 
 /**
- * Can determine if a microformat key with value exists in $mf. Returns true if so.
+ *
  * @param array $mfs
  * @param $propName
  * @param $propValue
@@ -577,3 +581,97 @@ function findMicroformatsByCallable(array $mfs, $callable, $flatten = true) {
 	
 	return array_values(array_filter($mfs, $callable));
 }
+
+/**
+ * Remove False Positive Root Microformats
+ * 
+ * Unfortunately, a well-known CSS framework uses some non-semantic classnames which look like root
+ * classnames to the microformats2 parsing algorithm. This function takes either a single microformat
+ * or a mf2 tree and restructures it as if the false positive classnames had never been there.
+ * 
+ * Always returns a microformat collection (`{"items": []}`) even when passed a single microformat, as
+ * if the single microformat was a false positive, it may be replaced with more than one child.
+ * 
+ * The default list of known false positives is stored in `FALSE_POSITIVE_ROOT_CLASSNAME_REGEXES` and
+ * is used by default. You can provide your own list if you want. Some of the known false positives are
+ * prefixes, so the values of `$classnamesToRemove` must all be regexes (e.g. `'/h-wrong/'`).
+ */
+function removeFalsePositiveRootMicroformats(array $mfs, ?array $classnamesToRemove=null) {
+	if (is_null($classnamesToRemove)) {
+		$classnamesToRemove = FALSE_POSITIVE_ROOT_CLASSNAME_REGEXES;
+	}
+
+	if (!isMicroformatCollection($mfs)) {
+		if (isMicroformat($mfs)) {
+			$mfs = ['items' => [$mfs]];
+		}
+		// Nothing we can do with this, return it as-is.
+		return $mfs;
+	}
+
+	$correctedTree = ['items' => []];
+
+	$recurse = function ($mf) use (&$recurse, $classnamesToRemove) {
+		foreach ($mf['properties'] as $prop => $values) {
+			$newPropVals = [];
+			foreach ($values as $value) {
+				if (isMicroformat($value)) {
+					$newPropVals = array_merge($newPropVals, $recurse($value));
+				} else {
+					$newPropVals[] = $value;
+				}
+			}
+			$mf['properties'][$prop] = $newPropVals;
+		}
+
+		if (!empty($mf['children'])) {
+			$correctedChildren = [];
+			foreach ($mf['children'] as $child) {
+				$correctedChildren = array_merge($correctedChildren, $recurse($child));
+			}
+			$mf['children'] = $correctedChildren;
+		}
+
+		// If this mf structure’s types are all false-positive classnames, replace it with its children.
+		$hasOnlyFalsePositiveRootClassnames = true;
+		foreach ($mf['type'] as $mft) {
+			$currentTypeIsFalsePositive = false;
+			foreach ($classnamesToRemove as $ctr) {
+				if (1 === preg_match($ctr, $mft)) {
+					$currentTypeIsFalsePositive = true;
+					break;
+				}
+			}
+			if (false === $currentTypeIsFalsePositive) {
+				$hasOnlyFalsePositiveRootClassnames = false;
+				break;
+			}
+		}
+
+		if ($hasOnlyFalsePositiveRootClassnames) {
+			return array_key_exists('children', $mf) ? $mf['children'] : [];
+		} else {
+			return [$mf];
+		}
+	};
+
+	foreach ($mfs['items'] as $mf) {
+		$correctedTree['items'] = array_merge($correctedTree['items'], $recurse($mf));
+	}
+
+	return $correctedTree;
+}
+
+const FALSE_POSITIVE_ROOT_CLASSNAME_REGEXES = [
+	// https://tailwindcss.com/docs/height
+	'/h-px/',
+	'/h-auto/',
+	'/h-full/',
+	'/h-screen/',
+	'/h-min/',
+	'/h-max/',
+	'/h-fit/',
+	// https://chat.indieweb.org/dev/2022-11-14/1668463558928800
+	'/h-screen-[a-zA-Z0-9\-\_]+/',
+	'/h-full-[a-zA-Z0-9\-\_]+/'
+];

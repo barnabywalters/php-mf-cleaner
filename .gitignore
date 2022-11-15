@@ -1,6 +1,12 @@
 /nbproject/private/
-/vendor/
-.DS_Store
-tmp
 composer.phar
 .idea/
+tmp
+.DS_Store
+vendor
+composer.lock
+tests/tmp/*
+phpDocumentor.phar
+phpdoc.xml
+.phpdoc
+.phpunit.result.cache

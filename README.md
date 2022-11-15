@@ -8,7 +8,7 @@ Install using [Composer](https://getcomposer.org) by adding `barnabywalters/mf-c
 
 ```json
 {
-	"require: {
+	"require": {
 		"barnabywalters/mf-cleaner": "0.*"
 	}
 }
